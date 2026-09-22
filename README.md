@@ -1,4 +1,6 @@
-# Wizgard
+<p align="center">
+  <img src="public/logo.png" alt="Wizgard logo" width="320" />
+</p>
 
 **Local AI chat and image generation in one workspace.**
 
