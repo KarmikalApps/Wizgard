@@ -36,9 +36,9 @@ Use a writable folder on a drive with enough free space. Read the [model license
 
 | Operating system | Command / launcher |
 | --- | --- |
-| Windows 10/11, x64 | Double-click `Run_WIN.cmd` |
-| macOS, Apple Silicon or Intel | Run `bash Run_UNIX_MAC.sh` in Terminal |
-| Linux, x64 or ARM64 | Run `bash Run_UNIX_MAC.sh` in a terminal |
+| Windows 10/11, x64 | Run `Run_WIN.cmd` |
+| macOS, Apple Silicon or Intel | Run `Run_UNIX_MAC.sh` |
+| Linux, x64 or ARM64 | Run `Run_UNIX_MAC.sh` |
 
 Run terminal commands from the extracted project folder. The Unix/macOS script detects the operating system and processor automatically.
 
