@@ -10,6 +10,7 @@ export async function hashFile(file) {
   for await (const chunk of createReadStream(file)) hash.update(chunk);
   return hash.digest('hex');
 }
+function progress(value) { if (process.send) process.send({ type: 'download', ...value }); }
 export async function download(url, destination, expectedHash, expectedBytes, label) {
   if (existsSync(destination) && (!expectedBytes || (await stat(destination)).size === expectedBytes)) return destination;
   await mkdir(dirname(destination), { recursive: true });
@@ -22,6 +23,7 @@ export async function download(url, destination, expectedHash, expectedBytes, la
         if (await hashFile(partial) === expectedHash) { await rename(partial, destination); return destination; }
         await rm(partial); offset = 0;
       }
+      progress({ label, loaded: offset, total: expectedBytes, phase: 'downloading' });
       console.log('Downloading ' + label + (expectedBytes ? ' (' + (expectedBytes / 1e9).toFixed(2) + ' GB)' : '') + '…');
       const response = await fetch(url, { headers: offset ? { Range: 'bytes=' + offset + '-' } : {}, signal: AbortSignal.timeout(12 * 60 * 60 * 1000) });
       if (!response.ok) throw new Error('HTTP ' + response.status);
@@ -32,10 +34,11 @@ export async function download(url, destination, expectedHash, expectedBytes, la
       const stream = Readable.fromWeb(response.body);
       stream.on('data', chunk => {
         loaded += chunk.length;
-        if (Date.now() - printed > 5000) { console.log('  ' + label + ': ' + (loaded / 1e9).toFixed(2) + (expectedBytes ? ' / ' + (expectedBytes / 1e9).toFixed(2) : '') + ' GB'); printed = Date.now(); }
+        if (Date.now() - printed > 500) { progress({ label, loaded, total: expectedBytes, phase: 'downloading' }); console.log('  ' + label + ': ' + (loaded / 1e9).toFixed(2) + (expectedBytes ? ' / ' + (expectedBytes / 1e9).toFixed(2) : '') + ' GB'); printed = Date.now(); }
       });
       await pipeline(stream, createWriteStream(partial, { flags: append ? 'a' : 'w' }));
       if (expectedBytes && (await stat(partial)).size !== expectedBytes) throw new Error('Incomplete download.');
+      progress({ label, loaded: expectedBytes, total: expectedBytes, phase: 'verifying' });
       console.log('Verifying ' + label + '…');
       if (await hashFile(partial) !== expectedHash) { await rm(partial); throw new Error('SHA-256 verification failed.'); }
       await rename(partial, destination);

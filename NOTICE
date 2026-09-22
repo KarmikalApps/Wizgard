@@ -15,3 +15,10 @@ Model modifications and quantizations are published by 0xSojalSec,
 HauhauCS, Qwen, and Comfy-Org as identified in model-manifest.json.
 Wizgard does not claim authorship or ownership of these models, and is
 not affiliated with or endorsed by their publishers.
+
+Gemma is provided under and subject to the Gemma Terms of Use found at ai.google.dev/gemma/terms.
+Sulphur 2 and LTX components retain their publisher attribution and LTX-2 Community License.
+
+Qwen3-TTS and MOSS SoundEffect retain their Apache 2.0 notices.
+ACE-Step 1.5 retains its MIT license and ACE-Step Team attribution.
+Audio sources are identified in audio-model-manifest.json.

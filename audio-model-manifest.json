@@ -1,0 +1,193 @@
+[
+  {
+    "id": "speech",
+    "name": "Qwen3-TTS 1.7B",
+    "repo": "Qwen/Qwen3-TTS-12Hz-1.7B-CustomVoice",
+    "revision": "0c0e3051f131929182e2c023b9537f8b1c68adfe",
+    "selection": null,
+    "files": [
+      {
+        "filename": "config.json",
+        "bytes": 4908,
+        "sha256": null,
+        "gitOid": "95d74b20b7485f5dfa09d05988d6c606ec226811"
+      },
+      {
+        "filename": "generation_config.json",
+        "bytes": 245,
+        "sha256": null,
+        "gitOid": "1872b16d4535564abf2db5d6debe6cddd82b7f2e"
+      },
+      {
+        "filename": "merges.txt",
+        "bytes": 1671839,
+        "sha256": null,
+        "gitOid": "20024bfe7c83998e9aeaf98a0cd6a2ce6306c2f0"
+      },
+      {
+        "filename": "model.safetensors",
+        "bytes": 3833402552,
+        "sha256": "38b1d5971bdbd982b561cccec982669a53b0537c3cf5e9bd4778ed07bb2f5137",
+        "gitOid": "c01bc81874a6a96fb082d716ce06c87420f01ece"
+      },
+      {
+        "filename": "preprocessor_config.json",
+        "bytes": 127,
+        "sha256": null,
+        "gitOid": "0525dd953bb9241912f7147666f0d535165d5d4f"
+      },
+      {
+        "filename": "speech_tokenizer/config.json",
+        "bytes": 2336,
+        "sha256": null,
+        "gitOid": "06cc8dc4c5ec8a1929086b71b98c313020d9268b"
+      },
+      {
+        "filename": "speech_tokenizer/configuration.json",
+        "bytes": 76,
+        "sha256": null,
+        "gitOid": "ab58e2eaf53cd14a1a2a7527d9261ceea93a24cd"
+      },
+      {
+        "filename": "speech_tokenizer/model.safetensors",
+        "bytes": 682293092,
+        "sha256": "836b7b357f5ea43e889936a3709af68dfe3751881acefe4ecf0dbd30ba571258",
+        "gitOid": "026d66bfb5d730dcfd56450c5e9e51b3ef4e0712"
+      },
+      {
+        "filename": "speech_tokenizer/preprocessor_config.json",
+        "bytes": 234,
+        "sha256": null,
+        "gitOid": "ba40914f4f49ab98a8ca545d4892ef7291a39592"
+      },
+      {
+        "filename": "tokenizer_config.json",
+        "bytes": 7344,
+        "sha256": null,
+        "gitOid": "6ff9fd60cc623bb54bbd603cbd418c97a11528d7"
+      },
+      {
+        "filename": "vocab.json",
+        "bytes": 2776833,
+        "sha256": null,
+        "gitOid": "4783fe10ac3adce15ac8f358ef5462739852c569"
+      }
+    ]
+  },
+  {
+    "id": "sfx",
+    "name": "MOSS SoundEffect v2",
+    "repo": "OpenMOSS-Team/MOSS-SoundEffect-v2.0",
+    "revision": "e35df4d82fbe87fcd5d14e5d100e349c0c3c076d",
+    "selection": null,
+    "files": [
+      {
+        "filename": "model_index.json",
+        "bytes": 504,
+        "sha256": null,
+        "gitOid": "936d7fb5d4e492b6ac64bcce94c33fbfd3a56978"
+      },
+      {
+        "filename": "scheduler/scheduler_config.json",
+        "bytes": 134,
+        "sha256": null,
+        "gitOid": "63d930b308ad1b05dd71b91a747d7f87ff903a11"
+      },
+      {
+        "filename": "text_encoder/config.json",
+        "bytes": 726,
+        "sha256": null,
+        "gitOid": "044a86ecf7cb32238f3fae4184e55d354787edec"
+      },
+      {
+        "filename": "text_encoder/generation_config.json",
+        "bytes": 239,
+        "sha256": null,
+        "gitOid": "20a8a9156fc8c3f25295ca067f61fdf120d517c5"
+      },
+      {
+        "filename": "text_encoder/model-00001-of-00002.safetensors",
+        "bytes": 3441185608,
+        "sha256": "169ad53ec313c3a34b06c0809216e4fc072cce444a5d4ff2b59690d064130ed5",
+        "gitOid": "1414f1bda72e17b63551d847c05c68e3396ba717"
+      },
+      {
+        "filename": "text_encoder/model-00002-of-00002.safetensors",
+        "bytes": 622329984,
+        "sha256": "912becff8d60672aa8628ef08c05898d9adf17c2ad4ae3caf99b065622fdeff9",
+        "gitOid": "4aab3b30a4b8c6c1d0437a2576e0bea08507f12c"
+      },
+      {
+        "filename": "text_encoder/model.safetensors.index.json",
+        "bytes": 25605,
+        "sha256": null,
+        "gitOid": "986d7db875b47d21f68530f6baac038f1b297b39"
+      },
+      {
+        "filename": "tokenizer/merges.txt",
+        "bytes": 1671853,
+        "sha256": null,
+        "gitOid": "31349551d90c7606f325fe0f11bbb8bd5fa0d7c7"
+      },
+      {
+        "filename": "tokenizer/tokenizer.json",
+        "bytes": 11422654,
+        "sha256": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4",
+        "gitOid": "cd71f61a15a522601badb3dc960d800d9cb3766c"
+      },
+      {
+        "filename": "tokenizer/tokenizer_config.json",
+        "bytes": 9732,
+        "sha256": null,
+        "gitOid": "417d038a63fa3de29cfde265caedae14d1a58d92"
+      },
+      {
+        "filename": "tokenizer/vocab.json",
+        "bytes": 2776833,
+        "sha256": null,
+        "gitOid": "4783fe10ac3adce15ac8f358ef5462739852c569"
+      },
+      {
+        "filename": "transformer/config.json",
+        "bytes": 311,
+        "sha256": null,
+        "gitOid": "8828d73f1202f94ef006db4655a6340659147f6e"
+      },
+      {
+        "filename": "transformer/diffusion_pytorch_model.safetensors",
+        "bytes": 5664274560,
+        "sha256": "bda86e4d6730ff47cea47851d219880191e9d21d4d264b21a6ffe7cb2db9dfb0",
+        "gitOid": "fce7c67c0d5e47673f78dcf46bfeb9a787c433b0"
+      },
+      {
+        "filename": "vae/config.json",
+        "bytes": 169,
+        "sha256": null,
+        "gitOid": "cb812e0f17f290b47131f3c6fb49d3e7af57d636"
+      },
+      {
+        "filename": "vae/vae_128d_48k.pth",
+        "bytes": 1486465965,
+        "sha256": "07e6139ff33bd21ba8a7a7f40ed24aab13ac0d100cd686f8a9f3e03dc5251cb1",
+        "gitOid": "0ac1b5dbe87a8ac785b9dfd248d5bed12fe4564d"
+      }
+    ]
+  },
+  {
+    "id": "music",
+    "name": "ACE-Step 1.5 Turbo",
+    "repo": "Comfy-Org/ace_step_1.5_ComfyUI_files",
+    "revision": "694a9723ff772285c73f0700caacf944d3f02f8d",
+    "selection": [
+      "checkpoints/ace_step_1.5_turbo_aio.safetensors"
+    ],
+    "files": [
+      {
+        "filename": "checkpoints/ace_step_1.5_turbo_aio.safetensors",
+        "bytes": 10025478736,
+        "sha256": "67b0f43aa5c51c840bd0228e6a935d8ff416ec87e5df2fc0637da17a561252bc",
+        "gitOid": "db2ae74ffa68604baa5b69f2db653ae10efc9aae"
+      }
+    ]
+  }
+]

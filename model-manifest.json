@@ -42,5 +42,27 @@
     "repo": "Comfy-Org/Qwen-Image-2.1",
     "filename": "vae/qwen_image_2.1_vae_bf16.safetensors",
     "revision": "ace0edeb3791a594ddfa36ed5f41a178a394e921"
+  },
+  {
+    "id": "chat-projector",
+    "name": "Qwen chat vision projector",
+    "repo": "HauhauCS/Qwen3.8-27B-Uncensored-HauhauCS-Aggressive-MTP-GGUF",
+    "filename": "mmproj-Qwen3.8-27B-Uncensored-HauhauCS-Aggressive-BF16.gguf",
+    "revision": "993a5971fda8f30dd1b7eb2654792ba4415c7460",
+    "bytes": 931146624,
+    "sha256": "5681b690bcb8eb10cd28d62d078cb4e01521a3ea4880a3fc7d54de72de2dd142",
+    "path": "models/ollama/blobs/sha256-5681b690bcb8eb10cd28d62d078cb4e01521a3ea4880a3fc7d54de72de2dd142",
+    "url": "https://huggingface.co/HauhauCS/Qwen3.8-27B-Uncensored-HauhauCS-Aggressive-MTP-GGUF/resolve/993a5971fda8f30dd1b7eb2654792ba4415c7460/mmproj-Qwen3.8-27B-Uncensored-HauhauCS-Aggressive-BF16.gguf"
+  },
+  {
+    "id": "image-projector",
+    "name": "Qwen image reference projector",
+    "repo": "Qwen/Qwen3-VL-8B-Instruct-GGUF",
+    "filename": "mmproj-Qwen3VL-8B-Instruct-F16.gguf",
+    "revision": "f982a07559d4a2f6c8744d840bf6fccab30eea96",
+    "bytes": 1159029824,
+    "sha256": "ca524100ebf825c9a870db1c580d03879e0da0ab2541697e2458e64891cf9d38",
+    "path": "models/image/ca524100ebf825c9a870db1c580d03879e0da0ab2541697e2458e64891cf9d38/mmproj-Qwen3VL-8B-Instruct-F16.gguf",
+    "url": "https://huggingface.co/Qwen/Qwen3-VL-8B-Instruct-GGUF/resolve/f982a07559d4a2f6c8744d840bf6fccab30eea96/mmproj-Qwen3VL-8B-Instruct-F16.gguf"
   }
 ]

@@ -6,7 +6,8 @@ import { download, hashFile } from './download.mjs';
 const digestPattern = /^[0-9a-f]{64}$/;
 export function modelPath(model, sha256) {
   if (!digestPattern.test(sha256)) throw new Error('Invalid model checksum.');
-  if (model.id === 'chat') return 'models/ollama/blobs/sha256-' + sha256;
+  if (['chat', 'chat-projector'].includes(model.id)) return 'models/ollama/blobs/sha256-' + sha256;
+  if (model.kind === 'video') return 'models/video/' + model.category + '/' + sha256 + '/' + model.filename.split('/').at(-1);
   return 'models/image/' + sha256 + '/' + model.filename.split('/').at(-1);
 }
 function safePath(root, relative) {
@@ -25,20 +26,21 @@ export async function publisherModel(model, fetchImpl = fetch) {
   return { ...model, bytes: file.size, sha256: file.lfs.sha256, revision: info.sha,
     url: 'https://huggingface.co/' + model.repo + '/resolve/' + info.sha + '/' + model.filename.split('/').map(encodeURIComponent).join('/') };
 }
-export async function installedModels(root) {
+export async function installedModels(root, { catalogFile = 'model-manifest.json', stateFile = 'models/installed.json' } = {}) {
   try {
-    const state = JSON.parse(await readFile(join(root, 'models/installed.json'), 'utf8'));
+    const state = JSON.parse(await readFile(join(root, stateFile), 'utf8'));
     if (!Array.isArray(state.models)) throw new Error('Invalid installed model state.');
     for (const model of state.models) safePath(root, model.path);
     return state.models;
   } catch (error) {
     if (error.code !== 'ENOENT') throw error;
-    return JSON.parse(await readFile(join(root, 'model-manifest.json'), 'utf8'));
+    return JSON.parse(await readFile(join(root, catalogFile), 'utf8'));
   }
 }
-export async function updateModels(root, { fetchImpl = fetch, downloadImpl = download, log = console.log } = {}) {
-  const catalog = JSON.parse(await readFile(join(root, 'model-manifest.json'), 'utf8'));
-  const previous = await installedModels(root);
+export async function updateModels(root, { fetchImpl = fetch, downloadImpl = download, log = console.log, catalogFile = 'model-manifest.json', stateFile = 'models/installed.json', ids } = {}) {
+  const fullCatalog = JSON.parse(await readFile(join(root, catalogFile), 'utf8'));
+  const catalog = ids ? fullCatalog.filter(m => ids.includes(m.id)) : fullCatalog;
+  const previous = await installedModels(root, { catalogFile, stateFile });
   log('Checking publishers for model updates…');
   const checks = await Promise.all(catalog.map(async model => {
     try { return { latest: await publisherModel(model, fetchImpl), checked: true }; }
@@ -78,7 +80,7 @@ export async function updateModels(root, { fetchImpl = fetch, downloadImpl = dow
   // Activate the complete set only after every required file verifies.
   const folder = join(root, 'models'); await mkdir(folder, { recursive: true });
   const temp = join(folder, 'installed-' + randomUUID() + '.tmp');
-  await writeFile(temp, JSON.stringify({ checkedAt: new Date().toISOString(), models: chosen }, null, 2));
-  await rename(temp, join(folder, 'installed.json'));
+  await writeFile(temp, JSON.stringify({ checkedAt: new Date().toISOString(), models: [...previous.filter(m => !chosen.some(c => c.id === m.id)), ...chosen] }, null, 2));
+  await rename(temp, join(root, stateFile));
   return chosen;
 }

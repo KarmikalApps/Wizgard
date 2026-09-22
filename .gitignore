@@ -37,3 +37,14 @@ data/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Generated media in a project-root output location
+/Wizgard/
+**/Wizgard/images/
+**/Wizgard/videos/
+**/Wizgard/audio/
+*.flac
+*.wav
+*.mp3
+*.mp4
+*.webm

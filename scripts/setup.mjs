@@ -1,3 +1,4 @@
+import { setupVideo } from './setup-video.mjs';
 import { createReadStream, existsSync } from 'node:fs';
 import { mkdir, readFile, writeFile, stat, readdir } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
@@ -37,25 +38,26 @@ export async function unpack(root, entry) {
   } else await run('tar', args);
   await writeFile(marker, entry.sha256);
 }
-export async function setup(root) {
+export async function setupEngines(root, capability) {
   const platform = process.platform, arch = process.arch;
   if (!['win32-x64', 'darwin-arm64', 'darwin-x64', 'linux-x64', 'linux-arm64'].includes(platform + '-' + arch)) throw new Error('Supported platforms: Windows x64, macOS Apple Silicon/Intel, and Linux x64/ARM64.');
-  await updateModels(root);
+
   const manifest = JSON.parse(await readFile(join(root, 'runtime/platform-manifest.json'), 'utf8'));
   if (platform === 'win32') {
     const nvidia = spawnSync('nvidia-smi.exe', ['-L'], { stdio: 'ignore', windowsHide: true }).status === 0;
-    const wanted = ['ollama-win32', 'sd-win-cpu', ...(nvidia ? ['sd-win-cuda', 'sd-win-cudart'] : ['sd-win-vulkan'])];
+    const wanted = capability === 'chat' ? ['ollama-win32'] : ['sd-win-cpu', ...(nvidia ? ['sd-win-cuda', 'sd-win-cudart'] : ['sd-win-vulkan'])];
     for (const key of wanted) await unpack(root, manifest.find(e => e.key === key));
   } else {
     const prefix = platform === 'darwin' ? 'darwin' : 'linux-' + (arch === 'x64' ? 'amd64' : arch);
-    const wanted = ['ollama-' + prefix];
-    if (platform === 'darwin') wanted.push('sd-darwin');
-    if (platform === 'linux' && arch === 'x64') wanted.push('sd-linux-cpu', 'sd-linux-vulkan');
+    const wanted = capability === 'chat' ? ['ollama-' + prefix] : [];
+    if (capability === 'image' && platform === 'darwin') wanted.push('sd-darwin');
+    if (capability === 'image' && platform === 'linux' && arch === 'x64') wanted.push('sd-linux-cpu', 'sd-linux-vulkan');
     for (const key of wanted) {
       const entry = manifest.find(e => e.key === key);
       if (!entry) throw new Error('Missing platform archive entry: ' + key);
       await unpack(root, entry);
     }
+    if (capability === 'chat') return;
     let paths = platformPaths(root);
     let works = false;
     const existing = paths.engines.metal || paths.engines.cpu;
@@ -78,6 +80,9 @@ export async function setup(root) {
       await run(cmake, ['--build', build, '--config', 'Release', '--target', 'sd-cli', '--parallel', '4']);
     }
   }
+}
+export async function setup(root) {
+  const platform = process.platform, arch = process.arch;
   const npm = join(dirname(process.execPath), process.platform === 'win32' ? 'node_modules/npm/bin/npm-cli.js' : '../lib/node_modules/npm/bin/npm-cli.js');
   const lock = await hashFile(join(root, 'package-lock.json'));
   const expected = platform + '-' + arch + ':' + lock;

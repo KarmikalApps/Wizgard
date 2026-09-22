@@ -11,7 +11,7 @@ Wizgard is an independent interface developed by **Karmikal Apps**. Its MIT lice
 | Qwen3 VL 8B GGUF image text encoder | [Qwen](https://huggingface.co/Qwen/Qwen3-VL-8B-Instruct-GGUF) | Apache 2.0 |
 | Qwen Image 2.1 VAE | [Comfy-Org](https://huggingface.co/Comfy-Org/Qwen-Image-2.1) | Qwen Research License |
 
-**Qwen Image 2.1 is licensed for non-commercial research or evaluation. Commercial use requires a separate license from its licensor.** Wizgard's MIT license does not grant additional rights to those weights. Review the publishers' current terms before use or redistribution, especially after an automatic model update.
+**Qwen Image 2.1 is licensed for non-commercial research or evaluation. Commercial use requires a separate license from its licensor.** Wizgard's MIT license does not grant additional rights to those weights. Review the publishers' current terms before use or redistribution, especially after a model update.
 
 Copies of the Qwen Image agreement, Apache 2.0 text, and publisher model cards are in [licenses](licenses). The required Qwen attribution is retained in [NOTICE](NOTICE). When redistributing downloaded weights, retain their license agreements, attribution, and modification notices. A source-only clone of Wizgard contains no model weights.
 
@@ -28,3 +28,24 @@ Copies of the Qwen Image agreement, Apache 2.0 text, and publisher model cards a
 | [CMake](https://cmake.org/licensing/) | Optional native build tooling | BSD 3-Clause and bundled notices |
 
 Transitive packages and GPU libraries have additional notices in their downloaded distributions. Keep those notices with any full offline bundle. Dependencies are recorded in `package-lock.json`; runtime sources and checksums are recorded in `runtime/platform-manifest.json`. Neither file transfers ownership of third-party components to Karmikal Apps.
+
+## Video, attachments and browsing
+
+- **Sulphur 2** and its distilled speed adapter: [SulphurAI](https://huggingface.co/SulphurAI/Sulphur-2-base), derived from LTX. The publisher's [LTX-2 Community License](licenses/Sulphur-2-LICENSE.txt) applies to the weights.
+- **Gemma 3 12B video encoder**: [Comfy-Org repackaging](https://huggingface.co/Comfy-Org/ltx-2), based on Google's Gemma. See [Gemma Terms of Use](https://ai.google.dev/gemma/terms) and their incorporated use restrictions.
+- **ComfyUI**: separate local video process; [GPL-3.0](licenses/ComfyUI-LICENSE.txt). Its pinned source revision and download are recorded in `video-runtime-manifest.json`. Retain the license and corresponding source when redistributing it.
+- **PyTorch**, **uv**, GPU libraries and Python: retain their upstream and bundled license notices. They are downloaded into the private video runtime.
+- **PDF.js**, **Playwright**: Apache 2.0; **Mammoth**, **Busboy**, **LinkeDOM**, **ipaddr.js**: MIT; **Sharp**: Apache 2.0 with separately licensed native libraries; **Mozilla Readability**: Apache 2.0. Dependencies and their versions are recorded in `package-lock.json`.
+- **Chromium** and the bundled media tooling retain their own notices. Web search uses DuckDuckGo public results with a Bing RSS fallback and is subject to the provider's terms and availability; Wizgard is not affiliated with Microsoft.
+
+The two vision projectors come from the same HauhauCS and Qwen repositories as their associated chat/text encoders and retain those publishers' licenses. No third-party model becomes the property of Karmikal Apps through this integration.
+
+
+## Audio generation
+
+- **Qwen3-TTS 1.7B CustomVoice**: [Qwen model card](https://huggingface.co/Qwen/Qwen3-TTS-12Hz-1.7B-CustomVoice) and [Qwen3-TTS source](https://github.com/QwenLM/Qwen3-TTS), Apache 2.0.
+- **ACE-Step 1.5 Turbo**: [ACE-Step project](https://github.com/ace-step/ACE-Step-1.5), MIT; [Comfy-Org all-in-one checkpoint](https://huggingface.co/Comfy-Org/ace_step_1.5_ComfyUI_files). Its local ComfyUI engine remains GPL-3.0.
+- **MOSS SoundEffect v2**: [OpenMOSS model card](https://huggingface.co/OpenMOSS-Team/MOSS-SoundEffect-v2.0) and [MOSS-TTS source](https://github.com/OpenMOSS/MOSS-TTS), Apache 2.0. The pinned sound-effects package includes its own upstream dependencies and notices.
+- **Transformers**, **Diffusers**, **Accelerate**, **SoundFile**, **libsndfile**, **descript-audiotools**, **PyTorch** and their transitive dependencies retain their upstream licenses. Keep their distributed notices with a full installed bundle.
+
+Audio sources and immutable revisions are recorded in `audio-model-manifest.json` and `audio-runtime-manifest.json`. Model installation is optional and initiated through the app. None of these models or engines becomes the property of Karmikal Apps.

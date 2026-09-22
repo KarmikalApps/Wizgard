@@ -1,0 +1,39 @@
+{
+  "comfy": {
+    "commit": "73c9bad4d21e7addbe1d13bc92eee0f1431b017d",
+    "url": "https://codeload.github.com/Comfy-Org/ComfyUI/zip/73c9bad4d21e7addbe1d13bc92eee0f1431b017d",
+    "sha256": "a6bc4df3ffef9bbf734f96c2038381fe2415abe1b8b7b72e38ca3e3caf97b8ae",
+    "bytes": 13201561
+  },
+  "uv": [
+    {
+      "platform": "win32",
+      "arch": "x64",
+      "url": "https://github.com/astral-sh/uv/releases/download/0.12.17/uv-x86_64-pc-windows-msvc.zip",
+      "sha256": "a252121d5b59398fcb137c6ea448176459a44010f33f67e0072305a637119ca7",
+      "bytes": 17906210,
+      "archive": "uv-x86_64-pc-windows-msvc.zip"
+    },
+    {
+      "platform": "linux",
+      "arch": "x64",
+      "url": "https://github.com/astral-sh/uv/releases/download/0.12.17/uv-x86_64-unknown-linux-gnu.tar.gz",
+      "sha256": "fa82fd8dde8e8eefdecada6aa0889666556cfceb690d06e0c3bca49eb3070a63",
+      "bytes": 19755224,
+      "archive": "uv-x86_64-unknown-linux-gnu.tar.gz"
+    },
+    {
+      "platform": "linux",
+      "arch": "arm64",
+      "url": "https://github.com/astral-sh/uv/releases/download/0.12.17/uv-aarch64-unknown-linux-gnu.tar.gz",
+      "sha256": "d636d1b678e9e7f367ecb22b46bd1cabbed234d6bc3b4d96365d2b507f72f86c",
+      "bytes": 18965833,
+      "archive": "uv-aarch64-unknown-linux-gnu.tar.gz"
+    }
+  ],
+  "python": "3.13.12",
+  "torch": "2.10.0",
+  "torchvision": "0.25.0",
+  "torchaudio": "2.10.0",
+  "cudaIndex": "https://download.pytorch.org/whl/cu130"
+}

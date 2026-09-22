@@ -1,0 +1,62 @@
+{
+  "comfy": {
+    "commit": "73c9bad4d21e7addbe1d13bc92eee0f1431b017d",
+    "url": "https://codeload.github.com/Comfy-Org/ComfyUI/zip/73c9bad4d21e7addbe1d13bc92eee0f1431b017d",
+    "sha256": "a6bc4df3ffef9bbf734f96c2038381fe2415abe1b8b7b72e38ca3e3caf97b8ae",
+    "bytes": 13201561
+  },
+  "uv": [
+    {
+      "platform": "win32",
+      "arch": "x64",
+      "url": "https://github.com/astral-sh/uv/releases/download/0.12.17/uv-x86_64-pc-windows-msvc.zip",
+      "sha256": "a252121d5b59398fcb137c6ea448176459a44010f33f67e0072305a637119ca7",
+      "bytes": 17906210,
+      "archive": "uv-x86_64-pc-windows-msvc.zip"
+    },
+    {
+      "platform": "linux",
+      "arch": "x64",
+      "url": "https://github.com/astral-sh/uv/releases/download/0.12.17/uv-x86_64-unknown-linux-gnu.tar.gz",
+      "sha256": "fa82fd8dde8e8eefdecada6aa0889666556cfceb690d06e0c3bca49eb3070a63",
+      "bytes": 19755224,
+      "archive": "uv-x86_64-unknown-linux-gnu.tar.gz"
+    },
+    {
+      "platform": "linux",
+      "arch": "arm64",
+      "url": "https://github.com/astral-sh/uv/releases/download/0.12.17/uv-aarch64-unknown-linux-gnu.tar.gz",
+      "sha256": "d636d1b678e9e7f367ecb22b46bd1cabbed234d6bc3b4d96365d2b507f72f86c",
+      "bytes": 18965833,
+      "archive": "uv-aarch64-unknown-linux-gnu.tar.gz"
+    },
+    {
+      "platform": "darwin",
+      "arch": "arm64",
+      "url": "https://github.com/astral-sh/uv/releases/download/0.12.17/uv-aarch64-apple-darwin.tar.gz",
+      "sha256": "85f00cbdc6dd3e97eba4c31b4d014375a9fdfe8f570023b84e5102fc3456896b",
+      "bytes": 16929004,
+      "archive": "uv-aarch64-apple-darwin.tar.gz"
+    },
+    {
+      "platform": "darwin",
+      "arch": "x64",
+      "url": "https://github.com/astral-sh/uv/releases/download/0.12.17/uv-x86_64-apple-darwin.tar.gz",
+      "sha256": "8dcf05a8c809bb3c471d2b614788ba27a6e41298fc8c31ac84b5f4339fd468e5",
+      "bytes": 20592896,
+      "archive": "uv-x86_64-apple-darwin.tar.gz"
+    }
+  ],
+  "python": "3.12.12",
+  "torch": "2.10.0",
+  "torchvision": "0.25.0",
+  "torchaudio": "2.10.0",
+  "cudaIndex": "https://download.pytorch.org/whl/cu130",
+  "moss": {
+    "commit": "934d6826b084c46a0d033402174d5f8ac4ed2519",
+    "url": "https://codeload.github.com/OpenMOSS/MOSS-TTS/zip/934d6826b084c46a0d033402174d5f8ac4ed2519",
+    "sha256": "a0d3c10d24161eb7283dc5d88c10a164ca42c0e8d21e943a126403c18a598f09",
+    "bytes": 11922766
+  },
+  "qwenTts": "0.1.1"
+}
