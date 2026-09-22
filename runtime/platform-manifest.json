@@ -1,0 +1,188 @@
+[
+  {
+    "key": "ollama-darwin",
+    "archive": "runtime/archives/ollama-darwin.tgz",
+    "destination": "runtime/darwin/ollama",
+    "strip": 0,
+    "sha256": "f33b2a5aa59bc6c961ed3ec23ba9dc646ca6d99ced8d2a0d46eb3a522167dd3f",
+    "bytes": 158526160,
+    "url": "https://github.com/ollama/ollama/releases/download/v0.34.2/ollama-darwin.tgz"
+  },
+  {
+    "key": "ollama-linux-amd64",
+    "archive": "runtime/archives/ollama-linux-amd64.tar.zst",
+    "destination": "runtime/linux-x64/ollama",
+    "strip": 0,
+    "sha256": "e155b83589986d2c581fdbf1381ea3ebdb16549883679cd5a0627f7cdc05b12b",
+    "bytes": 1427542079,
+    "url": "https://github.com/ollama/ollama/releases/download/v0.34.2/ollama-linux-amd64.tar.zst"
+  },
+  {
+    "key": "ollama-linux-arm64",
+    "archive": "runtime/archives/ollama-linux-arm64.tar.zst",
+    "destination": "runtime/linux-arm64/ollama",
+    "strip": 0,
+    "sha256": "8edcfe99eb7546d9422cfa8297d341dcd50e090e192ce1a8092a6ab6d182867b",
+    "bytes": 1549897885,
+    "url": "https://github.com/ollama/ollama/releases/download/v0.34.2/ollama-linux-arm64.tar.zst"
+  },
+  {
+    "key": "sd-darwin",
+    "archive": "runtime/archives/sd-master-74988b2-bin-Darwin-macOS-26.6.2-arm64.zip",
+    "destination": "runtime/darwin/sd-cpu",
+    "strip": 0,
+    "sha256": "fbffe2165d2e34098a673a3398286880d7dc1cdf2625e87ebb8b6235aac51553",
+    "bytes": 34308825,
+    "url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-890-74988b2/sd-master-74988b2-bin-Darwin-macOS-26.6.2-arm64.zip",
+    "bundledArchive": "runtime/archives/sd-master-74988b2-bin-Darwin-macOS-26.6.2-arm64.tar.gz",
+    "bundledSha256": "ec5203ef7b7a6b090e61493fdd39b678157f08c2da42ebd98d431a6383d3602f"
+  },
+  {
+    "key": "sd-linux-cpu",
+    "archive": "runtime/archives/sd-master-74988b2-bin-Linux-Ubuntu-24.04-x86_64.zip",
+    "destination": "runtime/linux-x64/sd-cpu",
+    "strip": 0,
+    "sha256": "04f7b4db880167c1b7b25eefcde27aa301301568eadb17623876eb3b8c938198",
+    "bytes": 25418220,
+    "url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-890-74988b2/sd-master-74988b2-bin-Linux-Ubuntu-24.04-x86_64.zip",
+    "bundledArchive": "runtime/archives/sd-master-74988b2-bin-Linux-Ubuntu-24.04-x86_64.tar.gz",
+    "bundledSha256": "cbb6ac941a366a0d84d89cd540f7d164c75f0468e7a6ff5a999464ba7f5e16c7"
+  },
+  {
+    "key": "sd-linux-vulkan",
+    "archive": "runtime/archives/sd-master-74988b2-bin-Linux-Ubuntu-24.04-x86_64-vulkan.zip",
+    "destination": "runtime/linux-x64/sd-vulkan",
+    "strip": 0,
+    "sha256": "158d593c803d4e50ad0a93a12811dc4c638b998fd8a4cd43f484d4bba7f780b2",
+    "bytes": 38541512,
+    "url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-890-74988b2/sd-master-74988b2-bin-Linux-Ubuntu-24.04-x86_64-vulkan.zip",
+    "bundledArchive": "runtime/archives/sd-master-74988b2-bin-Linux-Ubuntu-24.04-x86_64-vulkan.tar.gz",
+    "bundledSha256": "d0019c23b20dfd89ca5a147382bb0c38b2e41b04ba551f559885a72184ac32ee"
+  },
+  {
+    "key": "cmake-linux-arm64",
+    "archive": "runtime/archives/cmake-4.4.3-linux-aarch64.tar.gz",
+    "destination": "runtime/linux-arm64/cmake",
+    "strip": 1,
+    "sha256": "2efc974dbd63b4444c0e8494b92f2e80c2d7e635b4b80eac2916985ddd8f72a6",
+    "bytes": 52036576,
+    "url": "https://github.com/Kitware/CMake/releases/download/v4.4.3/cmake-4.4.3-linux-aarch64.tar.gz"
+  },
+  {
+    "key": "cmake-linux-x64",
+    "archive": "runtime/archives/cmake-4.4.3-linux-x86_64.tar.gz",
+    "destination": "runtime/linux-x64/cmake",
+    "strip": 1,
+    "sha256": "d6c83076c575bc00b823522ac974bda66d0af05d6ddc30e739c12385cf32c6cc",
+    "bytes": 64872980,
+    "url": "https://github.com/Kitware/CMake/releases/download/v4.4.3/cmake-4.4.3-linux-x86_64.tar.gz"
+  },
+  {
+    "key": "cmake-darwin",
+    "archive": "runtime/archives/cmake-4.4.3-macos-universal.tar.gz",
+    "destination": "runtime/darwin/cmake",
+    "strip": 1,
+    "sha256": "0c5d65251c14cc884bfa16bdbed3c263ce5bffe2e21c0d0d00962cb0610464fa",
+    "bytes": 89445170,
+    "url": "https://github.com/Kitware/CMake/releases/download/v4.4.3/cmake-4.4.3-macos-universal.tar.gz"
+  },
+  {
+    "key": "node-darwin-arm64",
+    "archive": "runtime/archives/node-v24.19.0-darwin-arm64.tar.gz",
+    "destination": "runtime/darwin-arm64/node",
+    "strip": 1,
+    "sha256": "8294b7aa9b03997481c06babf1e8b270c859358f27da57a11509afe537ac381d",
+    "bytes": 52234372,
+    "url": "https://nodejs.org/dist/v24.19.0/node-v24.19.0-darwin-arm64.tar.gz"
+  },
+  {
+    "key": "node-darwin-x64",
+    "archive": "runtime/archives/node-v24.19.0-darwin-x64.tar.gz",
+    "destination": "runtime/darwin-x64/node",
+    "strip": 1,
+    "sha256": "d1b5e999db158c62fe8f7267a4476b035d8bd93b1a605bac24a3f0dd166e3316",
+    "bytes": 53439583,
+    "url": "https://nodejs.org/dist/v24.19.0/node-v24.19.0-darwin-x64.tar.gz"
+  },
+  {
+    "key": "node-linux-arm64",
+    "archive": "runtime/archives/node-v24.19.0-linux-arm64.tar.gz",
+    "destination": "runtime/linux-arm64/node",
+    "strip": 1,
+    "sha256": "d28c8a5bf0a808f0ed434a1dce8c54ae98f0371c0bd86ac58abc613f73e6643f",
+    "bytes": 57128466,
+    "url": "https://nodejs.org/dist/v24.19.0/node-v24.19.0-linux-arm64.tar.gz"
+  },
+  {
+    "key": "node-linux-x64",
+    "archive": "runtime/archives/node-v24.19.0-linux-x64.tar.gz",
+    "destination": "runtime/linux-x64/node",
+    "strip": 1,
+    "sha256": "f625d97cd707df4ff96254916fbc5ff014f09c09effe5a1e0ca8f6d41a8789d4",
+    "bytes": 57409532,
+    "url": "https://nodejs.org/dist/v24.19.0/node-v24.19.0-linux-x64.tar.gz"
+  },
+  {
+    "key": "ollama-win32",
+    "archive": "runtime/archives/ollama-windows-amd64.zip",
+    "destination": "runtime/ollama",
+    "strip": 0,
+    "sha256": "8f3fd071a2a2f9497b562f43502c77c2b701a99d1ee5dfda28da8c786373063b",
+    "url": "https://github.com/ollama/ollama/releases/download/v0.34.2/ollama-windows-amd64.zip",
+    "bytes": 1460928014
+  },
+  {
+    "key": "sd-win-cpu",
+    "archive": "runtime/archives/sd-master-74988b2-bin-win-cpu-x64.zip",
+    "destination": "runtime/sd-cpu",
+    "strip": 0,
+    "sha256": "24fcac70fadc41eb3524837893f1cb7ea54895fe4d807f88ef7afdeee8bd484b",
+    "url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-890-74988b2/sd-master-74988b2-bin-win-cpu-x64.zip",
+    "bytes": 17182628
+  },
+  {
+    "key": "sd-win-cuda",
+    "archive": "runtime/archives/sd-master-74988b2-bin-win-cuda12-x64.zip",
+    "destination": "runtime/sd-cuda",
+    "strip": 0,
+    "sha256": "e9b86c2166aaf3a89f3e13326312d34b79ec1a2b61101d0ccff2805e7ee7b269",
+    "url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-890-74988b2/sd-master-74988b2-bin-win-cuda12-x64.zip",
+    "bytes": 333039461
+  },
+  {
+    "key": "sd-win-cudart",
+    "archive": "runtime/archives/cudart-sd-bin-win-cu12-x64.zip",
+    "destination": "runtime/sd-cuda",
+    "strip": 0,
+    "sha256": "fe20366827d357c00797eebb58244dddab7fd9a348d70090c3871004c320f38d",
+    "url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-890-74988b2/cudart-sd-bin-win-cu12-x64.zip",
+    "bytes": 563452046
+  },
+  {
+    "key": "sd-win-vulkan",
+    "archive": "runtime/archives/sd-master-74988b2-bin-win-vulkan-x64.zip",
+    "destination": "runtime/sd-vulkan",
+    "strip": 0,
+    "sha256": "744c8f817c66ecfd02fbb9dc8b122e1f29f7240db1f6086dfde2669403c5d896",
+    "url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-890-74988b2/sd-master-74988b2-bin-win-vulkan-x64.zip",
+    "bytes": 31932748
+  },
+  {
+    "key": "source-sd",
+    "archive": "runtime/archives/source-sd-74988b290e40155fe2313914e44b979b750e958b.tar.gz",
+    "destination": "runtime/sd-source",
+    "strip": 1,
+    "sha256": "d089cc56a78c1379f78628aef35f775fa0724696e67c9fc9b4a05cddb5ff0ad2",
+    "url": "https://codeload.github.com/leejet/stable-diffusion.cpp/tar.gz/74988b290e40155fe2313914e44b979b750e958b",
+    "bytes": 119180828
+  },
+  {
+    "key": "source-ggml",
+    "archive": "runtime/archives/source-ggml-f583f393cd5dfdc129360bbf75cb3d49ccc837a8.tar.gz",
+    "destination": "runtime/sd-source/ggml",
+    "strip": 1,
+    "sha256": "e56a7c29352f16c9be8b87e1e91ac83a911a907017c9232929e4a52f00e01a9d",
+    "url": "https://codeload.github.com/leejet/ggml/tar.gz/f583f393cd5dfdc129360bbf75cb3d49ccc837a8",
+    "bytes": 3714749
+  }
+]

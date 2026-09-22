@@ -1,0 +1,39 @@
+# Dependencies, build output, and package caches
+node_modules/
+.pnpm-store/
+.npm/
+.cache/
+dist/
+build/
+coverage/
+
+# Downloaded runtimes; keep the small bootstrap catalogs in source control
+/runtime/*
+!/runtime/platform-manifest.json
+!/runtime/node-checksums.txt
+
+# Models, local history, generated images, logs, and installer copies
+models/
+data/
+/_Install/
+/outputs/
+/generated/
+*.gguf
+*.safetensors
+*.ckpt
+*.pt
+*.pth
+*.onnx
+*.part
+*.log
+*.tmp
+*.zip
+
+# Local configuration and machine-specific setup history
+.env
+.env.*
+!.env.example
+/SETUP-NOTES.md
+.DS_Store
+Thumbs.db
+desktop.ini

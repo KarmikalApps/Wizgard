@@ -1,0 +1,46 @@
+[
+  {
+    "name": "HauhauCS Qwen3.8 27B Q4_K_P",
+    "path": "models/ollama/blobs/sha256-ba36dc3c2b2ff5e0aa5d71092a8894546996a6a119ae391803dda07cdc08516d",
+    "url": "https://huggingface.co/HauhauCS/Qwen3.8-27B-Uncensored-HauhauCS-Aggressive-MTP-GGUF/resolve/993a5971fda8f30dd1b7eb2654792ba4415c7460/Qwen3.8-27B-Uncensored-HauhauCS-Aggressive-Q4_K_P.gguf",
+    "bytes": 17923393664,
+    "sha256": "ba36dc3c2b2ff5e0aa5d71092a8894546996a6a119ae391803dda07cdc08516d",
+    "id": "chat",
+    "repo": "HauhauCS/Qwen3.8-27B-Uncensored-HauhauCS-Aggressive-MTP-GGUF",
+    "filename": "Qwen3.8-27B-Uncensored-HauhauCS-Aggressive-Q4_K_P.gguf",
+    "revision": "993a5971fda8f30dd1b7eb2654792ba4415c7460"
+  },
+  {
+    "name": "Qwen Image 2.1 Q8_0",
+    "path": "models/image/qwen-image-2.1-Q8_0.gguf",
+    "url": "https://huggingface.co/0xSojalSec/Qwen-Image-2.1-Uncensored-GGUF/resolve/242be4d1f70cc26fa45773c452f81980ed656e2e/qwen-image-2.1-Q8_0.gguf",
+    "bytes": 7591551648,
+    "sha256": "763ee46b76069d9c54ab26719a0b9222575751560c8bf3a48275736c44351c0e",
+    "id": "diffusion",
+    "repo": "0xSojalSec/Qwen-Image-2.1-Uncensored-GGUF",
+    "filename": "qwen-image-2.1-Q8_0.gguf",
+    "revision": "242be4d1f70cc26fa45773c452f81980ed656e2e"
+  },
+  {
+    "name": "Qwen3 VL 8B image text encoder Q8_0",
+    "path": "models/image/Qwen3VL-8B-Instruct-Q8_0.gguf",
+    "url": "https://huggingface.co/Qwen/Qwen3-VL-8B-Instruct-GGUF/resolve/f982a07559d4a2f6c8744d840bf6fccab30eea96/Qwen3VL-8B-Instruct-Q8_0.gguf",
+    "bytes": 8709519456,
+    "sha256": "0d264b3941185d00a74f75c4245521dae088ff1efc90ab8d1754e83f5844adb0",
+    "id": "encoder",
+    "repo": "Qwen/Qwen3-VL-8B-Instruct-GGUF",
+    "filename": "Qwen3VL-8B-Instruct-Q8_0.gguf",
+    "revision": "f982a07559d4a2f6c8744d840bf6fccab30eea96"
+  },
+  {
+    "name": "Qwen Image 2.1 VAE",
+    "path": "models/image/qwen_image_2.1_vae_bf16.safetensors",
+    "url": "https://huggingface.co/Comfy-Org/Qwen-Image-2.1/resolve/ace0edeb3791a594ddfa36ed5f41a178a394e921/vae/qwen_image_2.1_vae_bf16.safetensors",
+    "bytes": 675509688,
+    "sha256": "bb21f7473051e1ac368515dd3f2e15cd44d7a11748ee8823e1ddca3e4876b7c9",
+    "id": "vae",
+    "repo": "Comfy-Org/Qwen-Image-2.1",
+    "filename": "vae/qwen_image_2.1_vae_bf16.safetensors",
+    "revision": "ace0edeb3791a594ddfa36ed5f41a178a394e921"
+  }
+]
