@@ -1,3 +1,4 @@
+import { huggingFaceHeaders } from './huggingface-auth.mjs';
 import { createReadStream, createWriteStream, existsSync } from 'node:fs';
 import { mkdir, stat, rename, rm } from 'node:fs/promises';
 import { dirname } from 'node:path';
@@ -25,8 +26,8 @@ export async function download(url, destination, expectedHash, expectedBytes, la
       }
       progress({ label, loaded: offset, total: expectedBytes, phase: 'downloading' });
       console.log('Downloading ' + label + (expectedBytes ? ' (' + (expectedBytes / 1e9).toFixed(2) + ' GB)' : '') + '…');
-      const response = await fetch(url, { headers: offset ? { Range: 'bytes=' + offset + '-' } : {}, signal: AbortSignal.timeout(12 * 60 * 60 * 1000) });
-      if (!response.ok) throw new Error('HTTP ' + response.status);
+      const response = await fetch(url, { headers: { ...(await huggingFaceHeaders(url)), ...(offset ? { Range: 'bytes=' + offset + '-' } : {}) }, signal: AbortSignal.timeout(12 * 60 * 60 * 1000) });
+      if (!response.ok) { const gated = [401,403].includes(response.status) && new URL(url).hostname === 'huggingface.co'; throw Object.assign(new Error(gated ? 'Hugging Face access is required. Grant access on the model publisher page, then sign in with hf auth login or set HF_TOKEN before starting Wizgard.' : 'HTTP ' + response.status), { permanent:gated }); }
       const append = offset > 0 && response.status === 206;
       if (append && !response.headers.get('content-range')?.startsWith('bytes ' + offset + '-')) throw new Error('Invalid download resume response.');
       if (!append) offset = 0;
@@ -45,6 +46,7 @@ export async function download(url, destination, expectedHash, expectedBytes, la
       return destination;
     } catch (error) {
       lastError = error;
+      if (error.permanent) break;
       if (attempt < 4) { console.log('Download interrupted; resuming (attempt ' + (attempt + 1) + '/4)…'); await new Promise(r => setTimeout(r, 1500)); }
     }
   }

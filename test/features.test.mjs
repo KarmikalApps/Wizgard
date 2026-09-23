@@ -7,7 +7,7 @@ import { join } from 'node:path';
 import { receiveAttachments, loadAttachments, attachmentContext, validateAttachmentIds, selectExcerpts } from '../server/attachments.mjs';
 import { validateRequest, routeFallback } from '../server/policy.mjs';
 import { publicAddress, publicURL } from '../server/web.mjs';
-import { buildVideoWorkflow, findVideoOutput } from '../server/video-workflow.mjs';
+import { findVideoOutput } from '../server/video-workflow.mjs';
 
 function testPDF() {
   const stream = 'BT /F1 12 Tf 50 700 Td (The verification code is LANTERN-73.) Tj ET';
@@ -53,11 +53,4 @@ test('web reader blocks private addresses, mapped IPv6 and DNS answers', async (
   await assert.rejects(publicURL('http://public.example',async()=>[{address:'127.0.0.1',family:4}]));
   await assert.rejects(publicURL('file:///etc/passwd'));
   await assert.rejects(publicURL('http://user:pass@example.com'));
-});
-test('video references become ordered guides and are cropped before decoding', () => {
-  const graph = buildVideoWorkflow({checkpoint:'model',encoder:'encoder',lora:'speed',prompt:'boat',seed:1,width:512,height:320,frames:49,sourceImages:['one.png','two.png','three.png'],outputId:'test'});
-  assert.deepEqual([graph['31'].inputs.frame_idx,graph['33'].inputs.frame_idx,graph['35'].inputs.frame_idx],[0,24,48]);
-  assert.deepEqual(graph['17'].inputs.samples,['60',2]);
-  assert.deepEqual(graph['12'].inputs.positive,['35',0]);
-  assert.equal(findVideoOutput({'20':{images:[{filename:'clip.mp4',type:'output'}]}}).filename,'clip.mp4');
 });

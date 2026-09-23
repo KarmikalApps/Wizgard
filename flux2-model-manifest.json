@@ -1,0 +1,41 @@
+[
+  {
+    "id": "flux2-diffusion",
+    "name": "FLUX.2-dev Q4_K_S",
+    "kind": "image",
+    "family": "flux2",
+    "repo": "city96/FLUX.2-dev-gguf",
+    "filename": "flux2-dev-Q4_K_S.gguf",
+    "bytes": 19299128288,
+    "sha256": "b9c1c8295ed044f54c3a9894a800e003b4ecc94bfb0f63192b68bafc232c2b27",
+    "revision": "ade5d688ddab0d9cf4a5b01bf4321e01c115020d",
+    "path": "models/image/flux2/b9c1c8295ed044f54c3a9894a800e003b4ecc94bfb0f63192b68bafc232c2b27/flux2-dev-Q4_K_S.gguf",
+    "url": "https://huggingface.co/city96/FLUX.2-dev-gguf/resolve/ade5d688ddab0d9cf4a5b01bf4321e01c115020d/flux2-dev-Q4_K_S.gguf"
+  },
+  {
+    "id": "flux2-encoder",
+    "name": "Mistral Small 3.2 24B Q4_K_M",
+    "kind": "image",
+    "family": "flux2",
+    "repo": "unsloth/Mistral-Small-3.2-24B-Instruct-2506-GGUF",
+    "filename": "Mistral-Small-3.2-24B-Instruct-2506-Q4_K_M.gguf",
+    "bytes": 14333922848,
+    "sha256": "a3cc56310807ed0d145eaf9f018ccda9ae7ad8edb41ec870aa2454b0d4700b3c",
+    "revision": "b750ec2299225e492f1bd27cab88a0a595fa848f",
+    "path": "models/image/flux2/a3cc56310807ed0d145eaf9f018ccda9ae7ad8edb41ec870aa2454b0d4700b3c/Mistral-Small-3.2-24B-Instruct-2506-Q4_K_M.gguf",
+    "url": "https://huggingface.co/unsloth/Mistral-Small-3.2-24B-Instruct-2506-GGUF/resolve/b750ec2299225e492f1bd27cab88a0a595fa848f/Mistral-Small-3.2-24B-Instruct-2506-Q4_K_M.gguf"
+  },
+  {
+    "id": "flux2-vae",
+    "name": "FLUX.2 VAE",
+    "kind": "image",
+    "family": "flux2",
+    "repo": "black-forest-labs/FLUX.2-dev",
+    "filename": "ae.safetensors",
+    "bytes": 336211292,
+    "sha256": "868fe7b343cc8f3a19dbcfcafbc3d5f888802be3f89bd81b65b3621a066ce8f3",
+    "revision": "26afe3a78bb242c0a8bb181dcc8937bb16e5c66c",
+    "path": "models/image/flux2/868fe7b343cc8f3a19dbcfcafbc3d5f888802be3f89bd81b65b3621a066ce8f3/ae.safetensors",
+    "url": "https://huggingface.co/black-forest-labs/FLUX.2-dev/resolve/26afe3a78bb242c0a8bb181dcc8937bb16e5c66c/ae.safetensors"
+  }
+]

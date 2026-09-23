@@ -1,8 +1,14 @@
+import { JobQueue } from './jobs.mjs';
+import { ProcessFreezer } from './process-control.mjs';
+import { ResourceMonitor } from './resources.mjs';
+import { localFetch } from './local-fetch.mjs';
 import { AudioRuntime } from './audio.mjs';
 import { audioNames, audioBrief } from './audio-policy.mjs';
 import { ModelManager } from './model-manager.mjs';
 import { GeneratedLibrary } from './library.mjs';
 import { VideoRuntime } from './video.mjs';
+import { imageModel, buildImageArgs } from './image-models.mjs';
+import { videoModel } from './video-models.mjs';
 import { attachmentLimits, receiveAttachments, loadAttachments, attachmentImagePath, attachmentContext } from './attachments.mjs';
 import { researchWeb } from './web.mjs';
 import http from 'node:http';
@@ -29,7 +35,6 @@ let uploads = 0;
 const PORT = Number(process.env.WIZGARD_PORT || 3210);
 const OLLAMA = 'http://127.0.0.1:11435';
 const MODEL = 'wizgard-qwen3.8:latest';
-const IMAGE_MODEL = 'Qwen Image 2.1 · Q8';
 const appInfo = JSON.parse(await readFile(join(ROOT, 'app-info.json'), 'utf8'));
 let models = await installedModels(ROOT);
 let chatModel = models.find(m => m.id === 'chat');
@@ -38,14 +43,27 @@ for (const dir of ['conversations', 'images', 'logs', 'home', 'temp', 'attachmen
 let runtime = { ready: false, starting: true, error: null };
 let ownedOllama = null;
 let ollamaPath = null;
-let active = null;
+const freezer=new ProcessFreezer(ROOT);
+const resources=new ResourceMonitor(ROOT);
+let timingSave=Promise.resolve();
+let timingHistory={};
+try{const saved=JSON.parse(await readFile(join(DATA,'generation-timing.json'),'utf8'));if(saved&&typeof saved==='object'&&!Array.isArray(saved))timingHistory=saved;}catch{}
+for(const [key,values] of Object.entries(timingHistory))if(!Array.isArray(values)||!values.length||values.some(n=>!Number.isFinite(n)||n<=0))delete timingHistory[key];
+// The bundled Ollama runner currently serializes the Qwen35 architecture.
+const jobs=new JobQueue({maxChats:1,timings:timingHistory,onTiming:data=>{timingSave=timingSave.then(async()=>{const path=join(DATA,'generation-timing.json');await writeFile(path+'.tmp',JSON.stringify(data));await rename(path+'.tmp',path);}).catch(()=>{});},run:runJob,pause:async job=>{
+  const roots=[job.child?.pid,video.child?.pid,audio.child?.pid,audio.music.child?.pid].filter(Boolean);
+  if(!roots.length&&ownedOllama?.pid)roots.push(ownedOllama.pid);
+  await freezer.pause(roots);
+},resume:()=>freezer.resume()});
+video.waitForResume=signal=>freezer.wait(signal);audio.music.waitForResume=signal=>freezer.wait(signal);
+const reserving=new Set();
 let shuttingDown = false;
 let clearing = false;
 
 let paths = platformPaths(ROOT);
 let sd = paths.engines;
 let defaultBackend = ['cuda', 'metal', 'vulkan', 'cpu'].find(k => sd[k]);
-const manager = new ModelManager(ROOT, { busy: () => !!active || clearing || uploads > 0 || runtime.starting, release: releaseEngines, changed: reloadModels });
+const manager = new ModelManager(ROOT, { busy: () => jobs.busy || reserving.size > 0 || clearing || uploads > 0 || runtime.starting, release: releaseEngines, changed: reloadModels });
 await manager.init();
 function modelBusy() { return manager.operating || ['running','cancelling'].includes(manager.job?.status); }
 async function releaseEngines() {
@@ -67,7 +85,8 @@ async function reloadModels() {
 async function unloadChat(signal) { if(runtime.ready) await ollama('/api/generate',{model:MODEL,keep_alive:0},signal); }
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 async function ollama(path, body, signal) {
-  const response = await fetch(OLLAMA + path, {
+  await freezer.wait(signal);
+  const response = await localFetch(OLLAMA + path, {
     method: body ? 'POST' : 'GET',
     headers: body ? { 'Content-Type': 'application/json' } : {},
     body: body ? JSON.stringify(body) : undefined,
@@ -100,7 +119,7 @@ async function startRuntime() {
       ownedOllama = spawn(exe, ['serve'], {
         cwd: ROOT, windowsHide: true, detached: process.platform !== 'win32',
         env: { ...process.env, OLLAMA_HOST: '127.0.0.1:11435', OLLAMA_MODELS: join(ROOT, 'models/ollama'),
-          OLLAMA_NO_CLOUD: '1', OLLAMA_NOPRUNE: '1', OLLAMA_MAX_LOADED_MODELS: '1', OLLAMA_NUM_PARALLEL: '1', OLLAMA_FLASH_ATTENTION: '1',
+          OLLAMA_NO_CLOUD: '1', OLLAMA_NOPRUNE: '1', OLLAMA_MAX_LOADED_MODELS: '1', OLLAMA_NUM_PARALLEL: '2', OLLAMA_FLASH_ATTENTION: '1',
           USERPROFILE: join(DATA, 'home'), HOME: join(DATA, 'home'), TEMP: join(DATA, 'temp'), TMP: join(DATA, 'temp') },
         stdio: ['ignore', 'pipe', 'pipe'],
       });
@@ -205,11 +224,16 @@ async function decideRoute(messages, signal) {
     return { route: routeFallback(messages.at(-1).content), imagePrompt: messages.at(-1).content, warning: 'Automatic routing used a basic fallback. Choose a mode explicitly if needed.' };
   }
 }
-async function generateImage(prompt, settings, signal, emit, references = []) {
+async function generateImage(prompt, settings, signal, emit, references = [], job) {
   const backend = settings.backend === 'auto' ? defaultBackend : settings.backend;
   const exe = sd[backend];
   if (!exe) throw new Error('The selected image runtime is missing.');
-  for (const name of ['diffusion', 'encoder', 'vae']) if (!existsSync(files[name])) throw new Error('Missing image model file: ' + basename(files[name]));
+  const selectedImage = imageModel(settings.imageModel);
+  if (!manager.items.some(m=>m.id===selectedImage.managerId && m.active)) throw new Error(selectedImage.name+' is not active. Enable it in Manage Models or choose another image model in Settings.');
+  const weights=await installedModels(ROOT,selectedImage);
+  const imageFiles=Object.fromEntries(['diffusion','encoder','vae','projector'].map((key,i)=>[key,weights.find(m=>m.id===selectedImage.ids[i])?.path]).filter(([,p])=>p).map(([key,p])=>[key,resolve(ROOT,p)]));
+  for (const name of ['diffusion','encoder','vae']) if (!imageFiles[name] || !existsSync(imageFiles[name])) throw new Error('Missing '+selectedImage.name+' component: '+name);
+  if(references.length && settings.imageModel==='qwen' && (!imageFiles.projector || !existsSync(imageFiles.projector))) throw new Error('Qwen Image vision component missing. Install or update it in Manage Models.');
   emit('status', { text: 'Making room for the image model…' });
   await unloadChat(signal);
   const running = runtime.ready ? await (await ollama('/api/ps', null, signal)).json() : {models:[]};
@@ -223,23 +247,15 @@ async function generateImage(prompt, settings, signal, emit, references = []) {
   const filename = id + '.png';
   const destination = join(DATA, 'images', filename);
   const seed = settings.seed < 0 ? randomInt(0, 2147483647) : settings.seed;
-  const args = ['--diffusion-model', files.diffusion, '--llm', files.encoder, '--vae', files.vae,
-    '-p', prompt, '-W', String(settings.width), '-H', String(settings.height), '--steps', String(settings.steps),
-    '--cfg-scale', '1', '--sampling-method', 'euler', '--seed', String(seed),
-    '--offload-to-cpu', '--diffusion-fa', '--vae-tiling', '-o', destination];
-  if (references.length) {
-    if (!files['image-projector'] || !existsSync(files['image-projector'])) throw new Error('Image vision component missing. Run the launcher to install it.');
-    args.push('--llm_vision', files['image-projector']);
-    for (const file of references) args.push('-r', attachmentImagePath(DATA, file));
-  }
+  const args = buildImageArgs({modelId:settings.imageModel,files:imageFiles,prompt,settings:{...settings,seed},destination,referencePaths:references.map(file=>attachmentImagePath(DATA,file))});
   if (backend === 'cpu') args.push('--backend', 'cpu');
-  emit('status', { text: 'Loading Qwen Image 2.1…' });
+  emit('status', { text: 'Loading '+selectedImage.name+'…' });
   const log = createWriteStream(join(DATA, 'logs', 'image-' + id + '.log'));
   await new Promise((res, rej) => {
     const child = spawn(exe, args, { cwd: dirname(exe), windowsHide: true,
       env: { ...process.env, LD_LIBRARY_PATH: dirname(exe) + (process.env.LD_LIBRARY_PATH ? ':' + process.env.LD_LIBRARY_PATH : '') },
       stdio: ['ignore', 'pipe', 'pipe'] });
-    active.child = child;
+    job.child = child;
     let tail = ''; let lastStep = -1;
     const onAbort = () => child.kill();
     signal.addEventListener('abort', onAbort, { once: true });
@@ -255,36 +271,56 @@ async function generateImage(prompt, settings, signal, emit, references = []) {
     child.stdout.on('data', output); child.stderr.on('data', output);
     child.on('error', error => { signal.removeEventListener('abort', onAbort); log.end(); rej(error); });
     child.on('exit', code => {
-      signal.removeEventListener('abort', onAbort); active.child = null; log.end();
+      signal.removeEventListener('abort', onAbort); job.child = null; log.end();
       if (signal.aborted) return rej(new DOMException('Stopped', 'AbortError'));
       if (code !== 0 || !existsSync(destination)) return rej(new Error('Image generation failed (exit ' + code + '). ' + tail.replace(/\x1b\[[0-9;]*m/g, '').slice(-900) + '\nSee data/logs/image-' + id + '.log.'));
       res();
     });
   });
-  return { imageUrl: '/generated/' + filename, imagePrompt: prompt, seed, width: settings.width, height: settings.height, steps: settings.steps };
+  return { imageModel:settings.imageModel, model:selectedImage.name, referenceCount:references.length, imageUrl: '/generated/' + filename, imagePrompt: prompt, seed, width: settings.width, height: settings.height, steps: settings.steps };
 }
-async function handleMessage(req, res) {
-  const input = validateRequest(await bodyJson(req));
-  if (active || clearing || uploads || modelBusy()) return sendJson(res, 409, { error: 'The workspace is busy. Wait or stop generation first.' });
-  if (!manager.snapshot().active.length) return sendJson(res,503,{error:'Install or activate a model in Manage Models.'});
-  if (input.mode !== 'auto' && !manager.has(input.mode)) return sendJson(res,400,{error:'This model is not active. Enable it in Manage Models.'});
-  const attachments = await loadAttachments(DATA, input.attachmentIds);
-  if (active || clearing || uploads || modelBusy()) return sendJson(res, 409, { error: 'The workspace is busy.' });
-  const abort = new AbortController();
-  active = { id: input.conversationId, abort, child: null };
-  let c;
-  try { c = input.conversationId ? await getConversation(input.conversationId) : { id: randomUUID(), title: input.prompt.slice(0, 55), createdAt: new Date().toISOString(), messages: [] }; }
-  catch (error) { active = null; throw error; }
-  active.id = c.id;
-  res.writeHead(200, { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', 'Connection': 'keep-alive', 'X-Accel-Buffering': 'no' });
-  const emit = (event, data) => { if (!res.destroyed) res.write('event: ' + event + '\ndata: ' + JSON.stringify(data) + '\n\n'); };
-  const heartbeat = setInterval(() => { if (!res.destroyed) res.write(': heartbeat\n\n'); }, 10000);
-  res.on('close', () => { if (!res.writableEnded) abort.abort(); });
-  c.messages.push({ id: randomUUID(), role: 'user', content: input.prompt, attachments, createdAt: new Date().toISOString() });
+async function enqueueMessage(req) {
+  let request=await bodyJson(req);
+  if(request.retryMessageId){
+    if(!/^[0-9a-f-]{36}$/.test(request.conversationId||'')||!/^[0-9a-f-]{36}$/.test(request.retryMessageId))throw Object.assign(new Error('Invalid retry request.'),{status:400});
+    const original=(await getConversation(request.conversationId)).messages.find(m=>m.id===request.retryMessageId&&m.role==='user');
+    if(!original?.request)throw Object.assign(new Error('The original settings were not saved for this older prompt.'),{status:409});
+    request={...original.request,conversationId:request.conversationId,prompt:original.content};
+  }
+  if(request.variationId){
+    const item=await library.file(request.variationId),record=item.generation;
+    if(!record||!Object.keys(record.settings||{}).length)throw Object.assign(new Error('Generation settings were not recorded for this older asset.'),{status:409});
+    request={prompt:request.prompt??item.prompt,mode:record.mode,settings:{...record.settings,seed:-1},attachmentIds:record.request?.attachmentIds||[]};
+  }
+  const input=validateRequest(request);
+  if(clearing||modelBusy()||shuttingDown)throw Object.assign(new Error('The workspace is updating. Try again when it is ready.'),{status:409});
+  if(!manager.snapshot().active.length)throw Object.assign(new Error('Install or activate a model in Manage Models.'),{status:503});
+  if(input.mode!=='auto'&&!manager.has(input.mode))throw Object.assign(new Error('This model is not active. Enable it in Manage Models.'),{status:400});
+  const key=input.conversationId||randomUUID();
+  if(reserving.has(key)||jobs.forConversation(key))throw Object.assign(new Error('This conversation already has an unfinished response.'),{status:409});
+  reserving.add(key);let job;
+  try {
+    const attachments=await loadAttachments(DATA,input.attachmentIds);
+    const c=input.conversationId?await getConversation(key):{id:key,title:input.prompt.slice(0,55),createdAt:new Date().toISOString(),messages:[]};
+    c.messages.push({id:randomUUID(),role:'user',content:input.prompt,attachments,request:structuredClone({mode:input.mode,settings:input.settings,attachmentIds:input.attachmentIds}),createdAt:new Date().toISOString()});
+    job=jobs.create(input,c);job.attachments=attachments;
+    await saveConversation(c);jobs.ready(job);return job;
+  } catch(e){if(job)jobs.jobs.delete(job.id);throw e;}finally{reserving.delete(key);}
+}
+function streamJob(job,req,res) {
+  res.writeHead(200,{'Content-Type':'text/event-stream','Cache-Control':'no-cache','Connection':'keep-alive','X-Accel-Buffering':'no'});
+  const emit=(event,data)=>{if(!res.destroyed)res.write('event: '+event+'\ndata: '+JSON.stringify(data)+'\n\n');if(event==='end')res.end();};
+  for(const entry of job.events)emit(entry.event,entry.data);
+  if(res.writableEnded)return;
+  job.listeners.add(emit);const heartbeat=setInterval(()=>{if(!res.destroyed)res.write(': heartbeat\n\n');},10000);
+  res.on('close',()=>{clearInterval(heartbeat);job.listeners.delete(emit);});
+}
+async function runJob(job) {
+  const {input,abort,attachments}=job,c=job.conversation;
+  const emit=(event,data)=>jobs.emit(job,event,data);
+  await freezer.wait(abort.signal);
   const assistant = { id: randomUUID(), role: 'assistant', content: '', createdAt: new Date().toISOString() };
   try {
-    await saveConversation(c);
-    emit('conversation', { conversation: c });
     const messages = await historyMessages(c, input.prompt);
     let decision = { route: input.mode, imagePrompt: input.prompt };
     if (input.mode === 'auto') {
@@ -295,8 +331,10 @@ async function handleMessage(req, res) {
     }
     if (!manager.has(decision.route)) throw new Error('This request needs the ' + decision.route + ' model. Install or activate it in Manage Models.');
     if (decision.route === 'chat' && !runtime.ready) throw new Error(runtime.error || 'The chat model is still starting.');
+    if(decision.route!=='chat')await jobs.exclusive(job);
+    await freezer.wait(abort.signal);
     assistant.kind = decision.route;
-    assistant.model = audioNames[decision.route] || (decision.route === 'video' ? 'Sulphur 2' : decision.route === 'image' ? IMAGE_MODEL : 'Qwen 3.8 · 27B');
+    assistant.model = audioNames[decision.route] || (decision.route === 'video' ? videoModel(input.settings.videoModel).name : decision.route === 'image' ? imageModel(input.settings.imageModel).name : 'Qwen 3.8 · 27B');
     emit('route', { route: decision.route, model: assistant.model });
     c.messages.push(assistant);
     const references = attachments.filter(f => f.kind === 'image');
@@ -316,19 +354,23 @@ async function handleMessage(req, res) {
         planned=JSON.parse(response.message.content);
       }
       const brief=audioBrief(decision.route,input.prompt,input.settings,planned);
+      if(brief.durationSource==='auto')emit('notice',{text:'Auto audio duration: '+brief.seconds+' seconds'+(brief.durationLimited?' (model duration limit).':'.')});
       await unloadChat(abort.signal);
       const result=await audio.generate(brief,abort.signal,emit);
       Object.assign(assistant,result,{content:'Here is your '+(decision.route==='sfx'?'sound effect':decision.route)+'.'});
-      await library.register(assistant); emit('audio',assistant);
+      await library.register(assistant,{...input,mode:decision.route},brief); emit('audio',assistant);
     } else if (decision.route === 'video') {
-      emit('status', { text: 'Making room for Sulphur 2' });
+      const chosenVideo = videoModel(input.settings.videoModel);
+      if (references.length > chosenVideo.maxImages) throw new Error(chosenVideo.name + ' supports up to ' + chosenVideo.maxImages + ' image attachment(s) per clip.');
+      if (!manager.items.some(m=>m.id===chosenVideo.managerId && m.active)) throw new Error(chosenVideo.name + ' is not active. Enable it in Manage Models or choose another video model in Settings.');
+      emit('status', { text: 'Making room for ' + chosenVideo.name });
       await unloadChat(abort.signal);
       const result = await video.generate(creativePrompt, input.settings, abort.signal, emit, references.map(f => attachmentImagePath(DATA, f)));
-      Object.assign(assistant, result, { content: 'Here is your video.' }); await library.register(assistant); emit('video', assistant);
+      Object.assign(assistant, result, { content: 'Here is your video.' }); await library.register(assistant,{...input,mode:decision.route}); emit('video', assistant);
     } else if (decision.route === 'image') {
-      const result = await generateImage(creativePrompt, input.settings, abort.signal, emit, references);
+      const result = await generateImage(creativePrompt, input.settings, abort.signal, emit, references, job);
       Object.assign(assistant, result, { content: 'Here’s your image.' });
-      await library.register(assistant); emit('image', assistant);
+      await library.register(assistant,{...input,mode:decision.route}); emit('image', assistant);
     } else {
       let webContext = '';
       if (input.settings.web) {
@@ -357,6 +399,7 @@ async function handleMessage(req, res) {
         }
       };
       for await (const chunk of response.body) {
+        await freezer.wait(abort.signal);
         buffer += decoder.decode(chunk, { stream: true });
         const lines = buffer.split('\n'); buffer = lines.pop();
         for (const line of lines) consume(line);
@@ -373,7 +416,7 @@ async function handleMessage(req, res) {
     if (!c.messages.some(m => m.id === assistant.id)) c.messages.push(assistant);
     await saveConversation(c).catch(() => {});
     emit('error', { message: assistant.error, conversation: c });
-  } finally { clearInterval(heartbeat); active = null; res.end(); }
+  }
 }
 async function serveFile(res, folder, relative, req) {
   const path = resolve(folder, relative);
@@ -395,7 +438,8 @@ async function serveFile(res, folder, relative, req) {
 }
 async function shutdown() {
   if (shuttingDown) return; shuttingDown = true;
-  active?.abort.abort(); active?.child?.kill();
+  await jobs.stopAll();
+  await freezer.resume();
   await manager.cancel(); await audio.stop(); await video.stop();
   if (ownedOllama) {
     try { await ollama('/api/generate', { model: MODEL, keep_alive: 0 }); } catch {}
@@ -415,7 +459,7 @@ const server = http.createServer(async (req, res) => {
     if (req.headers.origin && !['http://127.0.0.1:' + PORT, 'http://localhost:' + PORT, 'http://127.0.0.1:5173', 'http://localhost:5173'].includes(req.headers.origin)) return sendJson(res, 403, { error: 'Origin rejected.' });
     const url = new URL(req.url, 'http://127.0.0.1:' + PORT);
     const path = url.pathname;
-    if (path === '/api/health') return sendJson(res, 200, { app: 'Wizgard', version: appInfo.version, runtime, modelManager: manager.snapshot(), output:library.settings(), video: (({ available, message, phase }) => ({ available, message, phase }))(await video.status()), attachmentLimits, busy: active ? { conversationId: active.id } : null,
+    if (path === '/api/health') return sendJson(res, 200, { app: 'Wizgard', version: appInfo.version, runtime, modelManager: manager.snapshot(), output:library.settings(), video: (({ available, message, phase }) => ({ available, message, phase }))(await video.status()), videoModels: (await video.choices()).map(m=>({...m,active:manager.items.some(item=>item.id===videoModel(m.id).managerId && item.active)})), attachmentLimits, busy: jobs.busy ? { conversationId: jobs.snapshot()[0]?.conversationId } : null, jobs:jobs.snapshot(),recentJobs:jobs.completedSnapshot(),
       models: { chat: existsSync(files.chat), image: ['diffusion', 'encoder', 'vae'].every(k => existsSync(files[k])) },
       engines: Object.fromEntries(Object.entries(sd).map(([key, value]) => [key, !!value])), platform: process.platform, defaultBackend, ollamaUrl: OLLAMA, chatModel: MODEL });
     if(path==='/api/models' && req.method==='GET') return sendJson(res,200,manager.snapshot());
@@ -424,8 +468,15 @@ const server = http.createServer(async (req, res) => {
     if(path==='/api/models/cancel' && req.method==='POST') return sendJson(res,200,await manager.cancel());
     if(path==='/api/models/active' && req.method==='POST') { const b=await bodyJson(req);return sendJson(res,200,await manager.setActive(b.id,b.active)); }
     if(path==='/api/models/uninstall' && req.method==='POST') {const b=await bodyJson(req);return sendJson(res,200,await manager.uninstall(b.id,b.confirmation));}
-    if(path==='/api/output' && req.method==='POST') {if(active||clearing) return sendJson(res,409,{error:'Wait for generation to finish.'});return sendJson(res,200,await library.configure((await bodyJson(req)).outputLocation));}
-    if(path==='/api/library' && req.method==='GET') return sendJson(res,200,library.list(url.searchParams.get('category')||'all',url.searchParams.get('page')));
+    if(path==='/api/output' && req.method==='POST') {if(jobs.busy||reserving.size||clearing) return sendJson(res,409,{error:'Wait for generation to finish.'});return sendJson(res,200,await library.configure((await bodyJson(req)).outputLocation));}
+    if(path==='/api/library' && req.method==='GET') {await library.pruneMissing();return sendJson(res,200,library.list(url.searchParams.get('category')||'all',url.searchParams.get('page'),{q:url.searchParams.get('q'),model:url.searchParams.get('model'),from:url.searchParams.get('from'),to:url.searchParams.get('to'),favorite:url.searchParams.get('favorite')==='true'}));}
+    if(path==='/api/library/remove'&&req.method==='POST'){
+      if(clearing)return sendJson(res,409,{error:'Workspace clearing is in progress.'});
+      const b=await bodyJson(req);if(b.id?b.confirmation!=='REMOVE_ASSET':b.confirmation!=='REMOVE_CATEGORY_'+b.category)return sendJson(res,400,{error:'Confirm the generated files to remove.'});
+      return sendJson(res,200,await library.remove(b));
+    }
+    const favoriteAction=path.match(/^\/api\/library\/([0-9a-f-]{36})\/favorite$/);
+    if(favoriteAction&&req.method==='POST')return sendJson(res,200,await library.favorite(favoriteAction[1],(await bodyJson(req)).favorite));
     const libraryAction=path.match(/^\/api\/library\/([0-9a-f-]{36})\/reveal$/);
     if(libraryAction && req.method==='POST') {await library.reveal(libraryAction[1]);return sendJson(res,200,{ok:true});}
     const libraryFile=path.match(/^\/library-files\/([0-9a-f-]{36})$/);
@@ -433,13 +484,13 @@ const server = http.createServer(async (req, res) => {
     if (path === '/api/workspace/clear' && req.method === 'POST') {
       const body = await bodyJson(req);
       if (body.confirmation !== 'DELETE_ALL_WORKSPACE_DATA') return sendJson(res, 400, { error: 'Explicit confirmation is required.' });
-      if (active || clearing || uploads || modelBusy()) return sendJson(res, 409, { error: 'Stop generation before clearing the workspace.' });
+      if (jobs.busy || reserving.size || clearing || uploads || modelBusy()) return sendJson(res, 409, { error: 'Stop generation before clearing the workspace.' });
       clearing = true;
       try { await library.clear(); await clearWorkspaceData(DATA); return sendJson(res, 200, { ok: true }); }
       finally { clearing = false; }
     }
     if (path === '/api/attachments' && req.method === 'POST') {
-      if (active || clearing || uploads || modelBusy()) return sendJson(res, 409, { error: 'The workspace is busy.' });
+      if (clearing || modelBusy()) return sendJson(res, 409, { error: 'The workspace is busy.' });
       uploads++; try { return sendJson(res, 200, await receiveAttachments(req, DATA)); } finally { uploads--; }
     }
     const attachmentMatch = path.match(/^\/attachments\/([0-9a-f-]{36})\/(image\.png|original)$/);
@@ -451,11 +502,17 @@ const server = http.createServer(async (req, res) => {
     if (path === '/api/conversations' && req.method === 'GET') return sendJson(res, 200, await listConversations());
     const conversationMatch = path.match(/^\/api\/conversations\/([0-9a-f-]{36})$/);
     if (conversationMatch && req.method === 'DELETE') {
-      if (clearing || active?.id === conversationMatch[1]) return sendJson(res, 409, { error: 'The workspace is busy.' });
+      if (clearing || reserving.has(conversationMatch[1]) || jobs.forConversation(conversationMatch[1])) return sendJson(res, 409, { error: 'The workspace is busy.' });
       await unlink(conversationPath(conversationMatch[1])); return sendJson(res, 200, { ok: true });
     }
-    if (path === '/api/message' && req.method === 'POST') return await handleMessage(req, res);
-    if (path === '/api/stop' && req.method === 'POST') { active?.abort.abort(); return sendJson(res, 200, { ok: true }); }
+    if(path==='/api/resources'&&req.method==='GET')return sendJson(res,200,await resources.read());
+    if(path==='/api/jobs/reorder'&&req.method==='POST')return sendJson(res,200,jobs.reorder((await bodyJson(req)).ids));
+    if(path==='/api/jobs'&&req.method==='GET')return sendJson(res,200,jobs.snapshot());
+    if(path==='/api/jobs'&&req.method==='POST'){const job=await enqueueMessage(req);return sendJson(res,202,{id:job.id,conversation:job.conversation});}
+    const jobAction=path.match(/^\/api\/jobs\/([0-9a-f-]{36})\/(events|pause|resume|stop)$/);
+    if(jobAction){const job=jobs.jobs.get(jobAction[1]);if(!job)return sendJson(res,404,{error:'Generation not found.'});if(jobAction[2]==='events'&&req.method==='GET')return streamJob(job,req,res);if(req.method==='POST'&&jobAction[2]!=='events'){await jobs.control(job.id,jobAction[2]);return sendJson(res,200,jobs.snapshot());}}
+    if (path === '/api/message' && req.method === 'POST') return streamJob(await enqueueMessage(req),req,res);
+    if (path === '/api/stop' && req.method === 'POST') {const b=await bodyJson(req);const job=b.jobId?jobs.jobs.get(b.jobId):jobs.forConversation(b.conversationId);if(!job)return sendJson(res,400,{error:'Select a conversation to stop.'});await jobs.control(job.id,'stop');return sendJson(res,200,{ok:true});}
     if (path === '/api/shutdown' && req.method === 'POST') { sendJson(res, 200, { ok: true }); void shutdown(); return; }
     if (path.startsWith('/api/')) return sendJson(res, 404, { error: 'Unknown endpoint.' });
     if (path.startsWith('/generated-audio/')) return await serveFile(res,join(DATA,'audio'),decodeURIComponent(path.slice(17)),req);

@@ -1,6 +1,6 @@
 {
   "name": "wizgard",
-  "version": "1.200.0-a",
+  "version": "1.302.0-a",
   "private": true,
   "allowScripts": {
     "esbuild": true

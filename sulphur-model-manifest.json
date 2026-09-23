@@ -1,0 +1,41 @@
+[
+  {
+    "id": "video",
+    "kind": "video",
+    "name": "Sulphur 2 FP8",
+    "repo": "SulphurAI/Sulphur-2-base",
+    "filename": "sulphur_dev_fp8mixed.safetensors",
+    "category": "checkpoints",
+    "path": "models/video/checkpoints/sulphur_dev_fp8mixed.safetensors",
+    "revision": "65587bbb38c700622f9434a16e732c8b280c115e",
+    "bytes": 29161842846,
+    "sha256": "41c999575859c528ff108022246a5524960a778c18742696971c9b0aadb4f70f",
+    "url": "https://huggingface.co/SulphurAI/Sulphur-2-base/resolve/65587bbb38c700622f9434a16e732c8b280c115e/sulphur_dev_fp8mixed.safetensors"
+  },
+  {
+    "id": "video-lora",
+    "kind": "video",
+    "name": "Sulphur 2 speed adapter",
+    "repo": "SulphurAI/Sulphur-2-base",
+    "filename": "distill_loras/ltx-2.3-22b-distilled-lora-1.1_fro90_ceil72_condsafe.safetensors",
+    "category": "loras",
+    "path": "models/video/loras/ltx-2.3-22b-distilled-lora-1.1_fro90_ceil72_condsafe.safetensors",
+    "revision": "65587bbb38c700622f9434a16e732c8b280c115e",
+    "bytes": 662072824,
+    "sha256": "e970f64a2ce5469491fb1714a3fa72c8b606fa82affff0531e836dbc91d31f34",
+    "url": "https://huggingface.co/SulphurAI/Sulphur-2-base/resolve/65587bbb38c700622f9434a16e732c8b280c115e/distill_loras/ltx-2.3-22b-distilled-lora-1.1_fro90_ceil72_condsafe.safetensors"
+  },
+  {
+    "id": "video-encoder",
+    "kind": "video",
+    "name": "Gemma 3 video text encoder",
+    "repo": "Comfy-Org/ltx-2",
+    "filename": "split_files/text_encoders/gemma_3_12B_it_fp4_mixed.safetensors",
+    "category": "text_encoders",
+    "path": "models/video/text_encoders/gemma_3_12B_it_fp4_mixed.safetensors",
+    "revision": "101c239b4b64dd1b45d645365339c56e0e7df4c3",
+    "bytes": 9447702218,
+    "sha256": "aaca463d11e6d8d2a4bdb0d6299214c15ef78a3f73e0ef8113d5a9d0219b3f6d",
+    "url": "https://huggingface.co/Comfy-Org/ltx-2/resolve/101c239b4b64dd1b45d645365339c56e0e7df4c3/split_files/text_encoders/gemma_3_12B_it_fp4_mixed.safetensors"
+  }
+]

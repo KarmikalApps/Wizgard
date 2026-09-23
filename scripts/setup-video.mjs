@@ -9,7 +9,7 @@ import { extractZip } from './zip.mjs';
 import { updateModels } from './models.mjs';
 import { findExecutable } from '../server/platform.mjs';
 
-export const videoCatalog = { catalogFile: 'video-model-manifest.json', stateFile: 'models/video-installed.json' };
+export const videoCatalog = { catalogFile: 'video-model-manifest.json', stateFile: 'models/ltx25-installed.json' };
 export function videoSupported() {
   return ['win32', 'linux'].includes(process.platform) && spawnSync(process.platform === 'win32' ? 'nvidia-smi.exe' : 'nvidia-smi', ['-L'], { stdio: 'ignore', windowsHide: true }).status === 0;
 }
@@ -20,7 +20,7 @@ function run(exe, args, options = {}) {
   });
 }
 export async function setupVideo(root, { models = true } = {}) {
-  if (!videoSupported()) { throw new Error('Sulphur video requires an NVIDIA GPU on Windows/Linux for this preview.'); }
+  if (!videoSupported()) { throw new Error('Video generation requires an NVIDIA GPU on Windows/Linux for this preview.'); }
   const manifest = JSON.parse(await readFile(join(root, 'video-runtime-manifest.json'), 'utf8'));
   const base = join(root, 'runtime/video-' + process.platform + '-' + process.arch);
   await mkdir(base, { recursive: true });

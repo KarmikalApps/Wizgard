@@ -24,8 +24,8 @@ try {
     const def = modelDefinitions.find(m => m.id === id); if (!def) throw new Error('Unknown model.');
     process.send?.({ type:'model',id,phase:'runtime',message:'Preparing ' + def.name + ' engine…' });
     if (def.audio) await setupAudio(root,{ models:false,kinds:[id] });
-    else if (id === 'video') await setupVideo(root,{ models:false });
-    else await setupEngines(root,id);
+    else if (def.capability === 'video') await setupVideo(root,{ models:false });
+    else await setupEngines(root,def.capability || id);
     if(id === 'chat') { try { await run(process.execPath,[resolve(root,'node_modules/playwright/cli.js'),'install','chromium'],{cwd:root,env:{...process.env,PLAYWRIGHT_BROWSERS_PATH:resolve(root,'runtime/browsers')}}); } catch(e) { console.warn('Browser unavailable; plain web pages can still be read. ' + e.message); } }
     process.send?.({ type:'model',id,phase:'weights',message:'Checking and downloading ' + def.name + '…' });
     if (def.audio) await updateAudioModels(root,{ ids:[id] });

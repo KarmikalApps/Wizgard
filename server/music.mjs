@@ -1,5 +1,6 @@
 import { VideoRuntime } from './video.mjs';
 import { readFile, mkdir, writeFile, rename, stat } from 'node:fs/promises';
+import { localFetch } from './local-fetch.mjs';
 import { createWriteStream } from 'node:fs';
 import { join, resolve, sep, basename, extname } from 'node:path';
 import { spawn } from 'node:child_process';
@@ -27,7 +28,8 @@ function findAudio(value) {
 }
 export class MusicRuntime extends VideoRuntime {
   async request(path, body, signal) {
-    const response = await fetch('http://127.0.0.1:8190' + path, { method: body ? 'POST' : 'GET', headers: body ? { 'Content-Type': 'application/json' } : {}, body: body ? JSON.stringify(body) : undefined, signal: signal || AbortSignal.timeout(15000) });
+    await this.waitForResume?.(signal);
+    const response = await localFetch('http://127.0.0.1:8190' + path, { method: body ? 'POST' : 'GET', headers: body ? { 'Content-Type': 'application/json' } : {}, body: body ? JSON.stringify(body) : undefined, signal: signal || AbortSignal.timeout(15000) });
     if (!response.ok) throw new Error('Music engine: ' + (await response.text()).slice(0, 1200));
     return response.json();
   }
@@ -50,7 +52,7 @@ export class MusicRuntime extends VideoRuntime {
       let connected = false;
       for (let i = 0; i < 240; i++) {
         signal.throwIfAborted(); if (child.exitCode !== null || child.signalCode !== null) throw new Error('Music engine stopped: ' + tail.slice(-1500));
-        try { await this.request('/system_stats'); connected = true; break; } catch {}
+        try { await this.request('/system_stats',null,signal); connected = true; break; } catch {}
         await sleep(500, undefined, { signal });
       }
       if (!connected) throw new Error('Music engine startup timed out.');

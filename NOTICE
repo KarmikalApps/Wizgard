@@ -22,3 +22,11 @@ Sulphur 2 and LTX components retain their publisher attribution and LTX-2 Commun
 Qwen3-TTS and MOSS SoundEffect retain their Apache 2.0 notices.
 ACE-Step 1.5 retains its MIT license and ACE-Step Team attribution.
 Audio sources are identified in audio-model-manifest.json.
+
+LTX-2.5 is published by Lightricks and retains the LTX-2.x Community License.
+Its Gemma text encoder retains the applicable Gemma terms.
+See licenses/LTX-2.5-LICENSE.txt and THIRD_PARTY_NOTICES.md.
+
+This FLUX Model is licensed by Black Forest Labs Inc. under the FLUX Non-Commercial License. Copyright Black Forest Labs Inc. IN NO EVENT SHALL BLACK FOREST LABS INC. BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH USE OF THIS MODEL.
+Wizgard selects city96's GGUF quantization and Unsloth's Mistral text encoder.
+The quantization modifies the base weight format; it is not an official Black Forest Labs distribution.

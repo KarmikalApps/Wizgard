@@ -31,9 +31,9 @@ Transitive packages and GPU libraries have additional notices in their downloade
 
 ## Video, attachments and browsing
 
-- **Sulphur 2** and its distilled speed adapter: [SulphurAI](https://huggingface.co/SulphurAI/Sulphur-2-base), derived from LTX. The publisher's [LTX-2 Community License](licenses/Sulphur-2-LICENSE.txt) applies to the weights.
-- **Gemma 3 12B video encoder**: [Comfy-Org repackaging](https://huggingface.co/Comfy-Org/ltx-2), based on Google's Gemma. See [Gemma Terms of Use](https://ai.google.dev/gemma/terms) and their incorporated use restrictions.
-- **ComfyUI**: separate local video process; [GPL-3.0](licenses/ComfyUI-LICENSE.txt). Its pinned source revision and download are recorded in `video-runtime-manifest.json`. Retain the license and corresponding source when redistributing it.
+- **LTX-2.5**: [Lightricks publisher repository](https://huggingface.co/Lightricks/LTX-2.5), [LTX-2.x Community License](licenses/LTX-2.5-LICENSE.txt). The configured distilled INT8 transformer, Gemma 4 text encoder, video/audio VAEs and spatial upscaler retain their publisher terms. The Gemma encoder is also subject to [Gemma Terms of Use](https://ai.google.dev/gemma/terms). Access to the official model repository requires the user's Hugging Face account.
+- **Sulphur 2**: [SulphurAI publisher repository](https://huggingface.co/SulphurAI/Sulphur-2-base), [publisher license copy](licenses/Sulphur-2-LICENSE.txt). Its Gemma 3 text encoder retains the Gemma Terms of Use. The application MIT license does not cover model weights.
+- **ComfyUI**: separate local video and music processes; [GPL-3.0](licenses/ComfyUI-LICENSE.txt). Its pinned source revision and download are recorded in `video-runtime-manifest.json`. Retain the license and corresponding source when redistributing it.
 - **PyTorch**, **uv**, GPU libraries and Python: retain their upstream and bundled license notices. They are downloaded into the private video runtime.
 - **PDF.js**, **Playwright**: Apache 2.0; **Mammoth**, **Busboy**, **LinkeDOM**, **ipaddr.js**: MIT; **Sharp**: Apache 2.0 with separately licensed native libraries; **Mozilla Readability**: Apache 2.0. Dependencies and their versions are recorded in `package-lock.json`.
 - **Chromium** and the bundled media tooling retain their own notices. Web search uses DuckDuckGo public results with a Bing RSS fallback and is subject to the provider's terms and availability; Wizgard is not affiliated with Microsoft.
@@ -49,3 +49,11 @@ The two vision projectors come from the same HauhauCS and Qwen repositories as t
 - **Transformers**, **Diffusers**, **Accelerate**, **SoundFile**, **libsndfile**, **descript-audiotools**, **PyTorch** and their transitive dependencies retain their upstream licenses. Keep their distributed notices with a full installed bundle.
 
 Audio sources and immutable revisions are recorded in `audio-model-manifest.json` and `audio-runtime-manifest.json`. Model installation is optional and initiated through the app. None of these models or engines becomes the property of Karmikal Apps.
+
+## FLUX.2-dev
+
+- [Black Forest Labs FLUX.2-dev](https://huggingface.co/black-forest-labs/FLUX.2-dev): 32B image model and VAE, [FLUX Non-Commercial License](licenses/FLUX.2-dev-LICENSE.txt).
+- [city96 GGUF quantization](https://huggingface.co/city96/FLUX.2-dev-gguf): Q4_K_S derivative; [bundled license](licenses/FLUX.2-dev-GGUF-LICENSE.txt). The publisher's quantization is a modified format of the base weights, not a model authored by Karmikal Apps.
+- [Mistral Small 3.2 24B](https://huggingface.co/mistralai/Mistral-Small-3.2-24B-Instruct-2506), [Unsloth GGUF](https://huggingface.co/unsloth/Mistral-Small-3.2-24B-Instruct-2506-GGUF): Apache 2.0 text encoder.
+
+The FLUX model license requires filtering measures or review of outputs before distribution/display/transmission, and applicable AI-generated-content disclosure. This local integration uses manual output review: review generated files before sharing. Model use and generated outputs have distinct license conditions. The application license does not grant commercial model rights. Sources and pinned checksums are recorded in `flux2-model-manifest.json`.

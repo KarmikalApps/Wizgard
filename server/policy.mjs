@@ -1,3 +1,6 @@
+import { normalizeAudioSettings } from '../src/audio-options.mjs';
+import { imageOptions } from '../src/image-options.mjs';
+import { videoOptions } from '../src/video-options.mjs';
 import { voices, languages } from './audio-policy.mjs';
 import { validateAttachmentIds } from './attachments.mjs';
 export function validateRequest(body) {
@@ -5,21 +8,28 @@ export function validateRequest(body) {
   if (!body || typeof body.prompt !== 'string' || !body.prompt.trim() || body.prompt.length > 16000) fail('Enter a message between 1 and 16,000 characters.');
   if (!['auto', 'chat', 'image', 'video', 'speech', 'music', 'sfx'].includes(body.mode)) fail('Choose an available generation mode.');
   if (body.conversationId && !/^[0-9a-f-]{36}$/.test(body.conversationId)) fail('Invalid conversation ID.');
-  const options = body.settings || {};
-  const settings = { musicLyrics: options.musicLyrics ?? '', voice: options.voice ?? 'Ryan', language: options.language ?? 'Auto', voiceStyle: options.voiceStyle ?? '', musicSeconds: options.musicSeconds ?? 30, sfxSeconds: options.sfxSeconds ?? 10, width: options.width ?? 1024, height: options.height ?? 1024, steps: options.steps ?? 25, seed: options.seed ?? -1,
-    videoWidth: options.videoWidth ?? 512, videoHeight: options.videoHeight ?? 320, videoSeconds: options.videoSeconds ?? 2, videoAudio: options.videoAudio !== false, web: options.web === true,
+  const options = normalizeAudioSettings(body.settings || {});
+  const imageId = options.imageModel ?? 'qwen';
+  if (!Object.hasOwn(imageOptions,imageId)) fail('Choose Qwen Image 2.1 or FLUX.2-dev for image generation.');
+  const videoId = options.videoModel ?? 'ltx25';
+  if (!Object.hasOwn(videoOptions, videoId)) fail('Choose LTX-2.5 or Sulphur 2 for video generation.');
+  const video = videoOptions[videoId];
+  const settings = { imageModel:imageId, imageGuidance:options.imageGuidance??4, musicLyrics: options.musicLyrics ?? '', voice: options.voice ?? 'Ryan', language: options.language ?? 'Auto', voiceStyle: options.voiceStyle ?? '', musicSeconds: options.musicSeconds ?? 120, sfxSeconds: options.sfxSeconds ?? 'auto', width: options.width ?? 1024, height: options.height ?? 1024, steps: options.steps ?? imageOptions[imageId].steps, seed: options.seed ?? -1,
+    videoWidth: options.videoWidth ?? 512, videoHeight: options.videoHeight ?? 320, videoSeconds: options.videoSeconds ?? 2, videoModel:videoId, videoFps:options.videoFps ?? video.fps, videoAudio:options.videoAudio === true, web: options.web === true,
     backend: options.backend ?? 'auto', thinking: options.thinking === true };
+  if (!Number.isFinite(settings.imageGuidance) || settings.imageGuidance < 1 || settings.imageGuidance > 10) fail('Image guidance must be between 1 and 10.');
   for (const key of ['width', 'height']) if (!Number.isInteger(settings[key]) || settings[key] < 256 || settings[key] > 2048 || settings[key] % 32) fail('Image dimensions must be multiples of 32 between 256 and 2048.');
   if (!Number.isInteger(settings.steps) || settings.steps < 1 || settings.steps > 60) fail('Choose 1–60 image steps.');
   if (!Number.isSafeInteger(settings.seed) || settings.seed < -1 || settings.seed > 2147483647) fail('Seed must be -1 (random) or an integer up to 2147483647.');
   if (!['auto', 'cuda', 'cpu', 'vulkan', 'metal'].includes(settings.backend)) fail('Choose an available image runtime.');
-  if (![[512,320],[512,512],[768,512],[512,768]].some(([w,h]) => w === settings.videoWidth && h === settings.videoHeight)) fail('Choose a supported video size.');
-  if (![2,4,6,8].includes(settings.videoSeconds)) fail('Choose a video duration of 2, 4, 6 or 8 seconds.');
+  if (!video.sizes.some(s=>s.width===settings.videoWidth && s.height===settings.videoHeight)) fail('Choose a supported resolution for ' + video.name + '.');
+  if (!video.frameRates.includes(settings.videoFps)) fail('Choose a supported frame rate for ' + video.name + '.');
+  if (!video.durations.includes(settings.videoSeconds)) fail('Choose a supported duration for ' + video.name + '.');
   if(typeof settings.musicLyrics !== 'string' || settings.musicLyrics.length > 10000) fail('Lyrics must be under 10,000 characters.');
   if (!voices.includes(settings.voice) || !languages.includes(settings.language)) fail('Choose a supported voice and language.');
   if (typeof settings.voiceStyle !== 'string' || settings.voiceStyle.length > 1000) fail('Voice style must be under 1,000 characters.');
   if (!Number.isInteger(settings.musicSeconds) || settings.musicSeconds < 5 || settings.musicSeconds > 180) fail('Music duration must be 5–180 seconds.');
-  if (!Number.isInteger(settings.sfxSeconds) || settings.sfxSeconds < 1 || settings.sfxSeconds > 30) fail('Sound effects must be 1–30 seconds.');
+  if (settings.sfxSeconds !== 'auto' && (!Number.isInteger(settings.sfxSeconds) || settings.sfxSeconds < 1 || settings.sfxSeconds > 30)) fail('Sound effects must be 1–30 seconds.');
   const attachmentIds = validateAttachmentIds(body.attachmentIds);
   return { attachmentIds, prompt: body.prompt.trim(), mode: body.mode, conversationId: body.conversationId || null, settings };
 }

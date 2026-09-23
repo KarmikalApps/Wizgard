@@ -1,0 +1,4 @@
+export const defaults={enabled:false,desktop:true,sound:true,errors:true,volume:.3,enabledAt:0};
+export function normalizeNotifications(value={}){value=value&&typeof value==='object'?value:{};return {...defaults,...value,enabled:value.enabled===true,volume:Math.max(0,Math.min(1,Number.isFinite(value.volume)?value.volume:.3))};}
+export function notificationEligible(job,prefs,since){return prefs.enabled&&Date.parse(job.finishedAt)>Math.max(since,prefs.enabledAt||0)&&(job.state==='complete'||(prefs.errors&&job.state==='error'));}
+export function claimNotification(storage,id){let ids=[];try{const saved=JSON.parse(storage.getItem('wizgard-notified-jobs')||'[]');if(Array.isArray(saved))ids=saved.filter(v=>typeof v==='string');}catch{}if(ids.includes(id))return false;storage.setItem('wizgard-notified-jobs',JSON.stringify([...ids,id].slice(-100)));return true;}

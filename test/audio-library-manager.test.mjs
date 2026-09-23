@@ -45,7 +45,7 @@ test('selective model updates leave unselected weights and state intact',async t
 });
 test('model manager supports zero-model setup, activation and confirmed uninstall without touching generated files',async t=>{
  const root=await fixture(t);await writeFile(join(root,'model-manifest.json'),JSON.stringify(['chat','chat-projector'].map(id=>({id,filename:id+'.gguf',path:'models/'+id+'.gguf',bytes:3,repo:'test/chat'}))));await writeFile(join(root,'video-model-manifest.json'),'[]');await writeFile(join(root,'audio-model-manifest.json'),JSON.stringify(['speech','music','sfx'].map(id=>({id,revision:'1'.repeat(40),files:[],repo:'test/'+id}))));
- const manager=new ModelManager(root);await manager.init();assert.equal(manager.snapshot().setupRequired,true);await assert.rejects(manager.install([]),/at least one/);
+ await writeFile(join(root,'sulphur-model-manifest.json'),'[]');const manager=new ModelManager(root);await writeFile(join(root,'flux2-model-manifest.json'),'[]');await manager.init();assert.equal(manager.snapshot().setupRequired,true);await assert.rejects(manager.install([]),/at least one/);
  for(const id of ['chat','chat-projector'])await writeFile(join(root,'models',id+'.gguf'),'yes');
  const engine=join(root,'runtime',process.platform==='win32'?'':process.platform==='darwin'?'darwin':'linux-'+process.arch,'ollama',process.platform==='win32'?'ollama.exe':'ollama');await mkdir(dirname(engine),{recursive:true});await writeFile(engine,'engine');await manager.refresh();assert.equal(manager.has('chat'),true);
  await manager.setActive('chat',false);assert.equal(manager.has('chat'),false);assert.equal(manager.snapshot().setupRequired,false);await manager.setActive('chat',true);
@@ -54,9 +54,22 @@ test('model manager supports zero-model setup, activation and confirmed uninstal
 test('installation exposes progress, blocks concurrent work and cancels its owned worker',async t=>{
  const root=await fixture(t);await writeFile(join(root,'model-manifest.json'),JSON.stringify([{id:'chat',filename:'chat.gguf',path:'models/chat.gguf',bytes:100,repo:'test/chat'}]));await writeFile(join(root,'video-model-manifest.json'),'[]');await writeFile(join(root,'audio-model-manifest.json'),JSON.stringify(['speech','music','sfx'].map(id=>({id,revision:'1'.repeat(40),files:[],repo:'test/'+id}))));
  await mkdir(join(root,'scripts'));await writeFile(join(root,'scripts/install-model.mjs'),"process.send({type:'model',id:'chat',phase:'weights',message:'Downloading test model'});process.send({type:'download',label:'test',loaded:42,total:100,phase:'downloading'});setInterval(()=>{},1000);");
- const manager=new ModelManager(root);await manager.init();await manager.install(['chat']);
+ await writeFile(join(root,'sulphur-model-manifest.json'),'[]');const manager=new ModelManager(root);await writeFile(join(root,'flux2-model-manifest.json'),'[]');await manager.init();await manager.install(['chat']);
  for(let i=0;i<100&&manager.job.percent!==42;i++)await new Promise(r=>setTimeout(r,20));
  assert.equal(manager.job.percent,42);await assert.rejects(manager.install(['chat']),/current installation/);
  await manager.cancel();for(let i=0;i<100&&manager.job.status!=='cancelled';i++)await new Promise(r=>setTimeout(r,20));
  assert.equal(manager.child,null);assert.equal(manager.job.status,'cancelled');assert.equal(manager.snapshot().setupRequired,true);
+});
+
+test('LTX replacement ignores the previous Sulphur installation state',async t=>{
+ const root=await fixture(t);await mkdir(join(root,'models'),{recursive:true});
+ await writeFile(join(root,'model-manifest.json'),'[]');
+ const ids=['ltx-transformer','ltx-encoder','ltx-vae','ltx-audio-vae','ltx-upscaler'];
+ await writeFile(join(root,'video-model-manifest.json'),JSON.stringify(ids.map(id=>({id,path:'models/'+id+'.safetensors',bytes:7,repo:'test/ltx',filename:id+'.safetensors'}))));
+ await writeFile(join(root,'models/video-installed.json'),JSON.stringify({models:[{id:'video',path:'models/old.safetensors',bytes:3,repo:'test/sulphur'}]}));
+ await writeFile(join(root,'models/old.safetensors'),'old');
+ await writeFile(join(root,'audio-model-manifest.json'),JSON.stringify(['speech','music','sfx'].map(id=>({id,revision:'1'.repeat(40),files:[],repo:'test/'+id}))));
+ await writeFile(join(root,'sulphur-model-manifest.json'),'[]');const manager=new ModelManager(root);await writeFile(join(root,'flux2-model-manifest.json'),'[]');await manager.init();const video=manager.items.find(m=>m.id==='video');
+ assert.equal(video.name,'LTX-2.5');assert.equal(video.installed,false);assert.equal(video.weights,false);assert.equal(video.bytes,35);
+ assert.equal(await readFile(join(root,'models/old.safetensors'),'utf8'),'old');
 });

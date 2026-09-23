@@ -7,6 +7,7 @@ const digestPattern = /^[0-9a-f]{64}$/;
 export function modelPath(model, sha256) {
   if (!digestPattern.test(sha256)) throw new Error('Invalid model checksum.');
   if (['chat', 'chat-projector'].includes(model.id)) return 'models/ollama/blobs/sha256-' + sha256;
+  if (model.family === 'flux2') return 'models/image/flux2/' + sha256 + '/' + model.filename.split('/').at(-1);
   if (model.kind === 'video') return 'models/video/' + model.category + '/' + sha256 + '/' + model.filename.split('/').at(-1);
   return 'models/image/' + sha256 + '/' + model.filename.split('/').at(-1);
 }
