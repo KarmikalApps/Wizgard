@@ -1,5 +1,39 @@
 # Changelog
 
+## v1.400a — 2026-11-02
+
+### Optional models
+
+- Added Qwen3.8 OrcaRouter 27B Q4_K_M and DeepSeek V4.1 Flash 1017 GSQ-RCO IQ2_XXS as optional publisher-described uncensored chat models.
+- Added a private llama.cpp runtime for DeepSeek, with verified platform downloads, vision projector support, owned-process shutdown and Pause/Resume integration. Its approximately 250 GB weights download only when selected for installation.
+- Added Z-Image Turbo with a Heretic uncensored text encoder for text-to-image generation, and an experimental LTX-2.5 Uncensored Turbo v1.1 video option.
+- Added a Chat generation selector and independent model installation, activation, updates and removal. Original models and default setup selections are unchanged.
+
+### More complete answers
+
+- Removed the fixed 4,096-token chat response cap across supported chat models.
+- Automatically continue length-limited responses and reasoning-only completions in the same response.
+- Check for explicitly missing requested parts and continue when needed, with visible progress notices and repeated-output detection.
+- Preserve explicit Stop cancellation, Pause/Resume behavior and partial responses on engine errors.
+- Record the selected chat model in retry settings and queue timing history.
+
+### Documentation and maintenance
+
+- Recover from incomplete temporary Ollama runtime caches without removing existing files.
+- Prefer IPv4 DNS results for publisher connections while retaining IPv6 fallback, avoiding timeouts on partially configured IPv6 networks.
+
+- Updated setup, model selection, hardware estimates and third-party attribution for the optional models.
+- Checked configured publisher files on November 2, 2026: no changed checksums were found for existing model packages. Startup update checks remain enabled; downloads remain user-initiated.
+- Kept speech, music and sound-effects defaults unchanged. No unverified uncensored audio options were added.
+- Source packages exclude downloaded models, runtimes, dependencies, local settings, conversations, attachments, caches and generated media.
+
+### Notes for this release
+
+- Optional integrations have automated configuration/protocol coverage; full generation with their model weights has not been validated for this release.
+- Z-Image in Wizgard is text-to-image only. DeepSeek requires substantial storage and memory and uses llama.cpp rather than Ollama.
+- The community LTX Turbo publisher lists its license as unknown; review its upstream and adapter terms. The Wizgard MIT license does not grant rights to third-party models.
+- Automatic completion can take longer and cannot guarantee correctness. Media duration and resolution limits still apply.
+
 ## v1.302a — 2026-09-23
 
 ### New models and generation settings

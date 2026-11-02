@@ -17,7 +17,9 @@ export async function prepareOllamaPath(folder, original) {
   const hash = createHash('sha256');
   for await (const chunk of createReadStream(original)) hash.update(chunk);
   const fingerprint = hash.digest('hex');
-  const cache = join(cacheRoot, 'ollama-' + fingerprint.slice(0, 16));
+  let cache = join(cacheRoot, 'ollama-' + fingerprint.slice(0, 16));
+  const reference = cache + '.path';
+  try { const saved=await readFile(reference,'utf8'); if(saved.startsWith(cache+'-') && !saved.slice(cache.length+1).includes('/') && !saved.slice(cache.length+1).includes('\\')) cache=saved; } catch {}
   try {
     if ((await readFile(join(cache, '.ready'), 'utf8')) === fingerprint && (await stat(join(cache, executable))).isFile()) {
       return { exe: join(cache, executable) };
@@ -27,6 +29,14 @@ export async function prepareOllamaPath(folder, original) {
   const staging = join(cacheRoot, 'copy-' + randomUUID());
   await cp(folder, staging, { recursive: true, force: false, errorOnExist: true });
   await writeFile(join(staging, '.ready'), fingerprint);
-  await rename(staging, cache);
+  try { await rename(staging, cache); }
+  catch(error) {
+    // An incomplete cache or another running copy must not block startup.
+    // Keep it intact and give this verified copy its own directory.
+    if(!['EEXIST','ENOTEMPTY','EPERM'].includes(error.code))throw error;
+    cache=join(cacheRoot,'ollama-'+fingerprint.slice(0,16)+'-'+randomUUID());
+    await rename(staging,cache);
+    await writeFile(reference,cache);
+  }
   return { exe: join(cache, executable) };
 }

@@ -1,3 +1,4 @@
+import {llamaExecutable} from '../scripts/setup-llama.mjs';
 import { readFile, writeFile, mkdir, rename, stat, lstat, realpath, unlink, rm } from 'node:fs/promises';
 import { join, resolve, sep, dirname } from 'node:path';
 import { fork } from 'node:child_process';
@@ -8,6 +9,11 @@ import { videoSupported } from '../scripts/setup-video.mjs';
 import { VideoRuntime } from './video.mjs';
 
 export const modelDefinitions = [
+  {id:'orca',capability:'chat',name:'Qwen 3.8 OrcaRouter',subtitle:'27B · optional Q4_K_M',purpose:'Chat & understand',description:'An additional publisher-described uncensored chat and vision variant. The original HauhauCS model stays the default.',ids:['orca-chat','orca-projector'],catalog:'optional-model-manifest.json',stateFile:'models/optional-installed.json'},
+  {id:'deepseek41',capability:'chat',engine:'llama',name:'DeepSeek V4.1 Flash 1017',subtitle:'Optional · GSQ-RCO IQ2_XXS · llama.cpp',purpose:'Reason & analyze',description:'Advanced, very large uncensored community GGUF. About 250 GB of weights; SSD and substantial RAM required. First load can be slow. Separate local llama.cpp engine; not an Ollama model.',ids:['deepseek41-1','deepseek41-2','deepseek41-3','deepseek41-4','deepseek41-5','deepseek41-6','deepseek41-projector'],catalog:'optional-model-manifest.json',stateFile:'models/optional-installed.json'},
+  {id:'zimage',capability:'image',name:'Z-Image Turbo · Heretic encoder',subtitle:'Optional · Q8 · text-to-image',purpose:'Create images',description:'Z-Image Turbo paired with a publisher-described uncensored text encoder. Nine-step text-to-image generation; image references are not supported by this integration.',ids:['zimage-diffusion','zimage-encoder','zimage-vae'],catalog:'optional-model-manifest.json',stateFile:'models/optional-installed.json'},
+  {id:'ltxuc',capability:'video',name:'LTX-2.5 Uncensored Turbo v1.1',subtitle:'Optional · community FP8',purpose:'Make videos',description:'Community fine-tune with an uncensored encoder. Experimental integration. Publisher license metadata is unknown; review upstream and adapter terms before use.',ids:['ltxuc-transformer','ltxuc-encoder','ltxuc-vae','ltxuc-audio-vae','ltxuc-upscaler'],catalog:'optional-model-manifest.json',stateFile:'models/optional-installed.json'},
+
   { id: 'chat', name: 'Qwen 3.8', subtitle: '27B · HauhauCS', purpose: 'Chat & understand', description: 'Ask questions, analyze attachments, browse the web, and interpret creative requests.', ids: ['chat','chat-projector'], catalog: 'model-manifest.json', stateFile: 'models/installed.json' },
   { id: 'image', capability:'image', name: 'Qwen Image 2.1', subtitle: '0xSojalSec · Q8', purpose: 'Create images', description: 'Turn ideas into pictures and transform your reference images.', ids: ['diffusion','encoder','vae','image-projector'], catalog: 'model-manifest.json', stateFile: 'models/installed.json' },
   { id:'flux2', capability:'image', name:'FLUX.2-dev', subtitle:'32B · Q4_K_S', purpose:'Create images', description:'Generate and edit pictures with multiple references. FLUX non-commercial model license; review outputs before sharing.', ids:['flux2-diffusion','flux2-encoder','flux2-vae'], catalog:'flux2-model-manifest.json', stateFile:'models/flux2-installed.json' },
@@ -16,7 +22,7 @@ export const modelDefinitions = [
   { id: 'speech', name: 'Qwen3-TTS', subtitle: '1.7B · CustomVoice', purpose: 'Speak & narrate', description: 'Natural speech in ten languages with a choice of voices and delivery styles.', audio: true },
   { id: 'music', name: 'ACE-Step 1.5', subtitle: 'Turbo', purpose: 'Compose music', description: 'Create instrumental tracks or songs with lyrics from a description.', audio: true },
   { id: 'sfx', name: 'MOSS SoundEffect', subtitle: 'Version 2', purpose: 'Design sound effects', description: 'Generate ambience, Foley, and individual sound effects.', audio: true },
-];
+].sort((a,b)=>Number(['orca','deepseek41','zimage','ltxuc'].includes(a.id))-Number(['orca','deepseek41','zimage','ltxuc'].includes(b.id)));
 const json = async (path, fallback) => JSON.parse(await readFile(path, 'utf8').catch(e => { if (e.code === 'ENOENT') return JSON.stringify(fallback); throw e; }));
 export class ModelManager extends VideoRuntime {
   constructor(root, hooks = {}) { super(root); this.hooks = hooks; this.items = []; this.job = null; this.checking = false; this.checks = {}; }
@@ -33,7 +39,7 @@ export class ModelManager extends VideoRuntime {
     this.items = await Promise.all(modelDefinitions.map(async def => {
       const files = await this.filesFor(def);
       const weights = files.length > 0 && (def.audio || files.length === def.ids.length) && (await Promise.all(files.map(f => stat(f.path).then(s => s.size === f.bytes).catch(() => false)))).every(Boolean);
-      const engine = def.id === 'chat' ? platform.ollamaExe : def.capability === 'image' ? Object.values(platform.engines).find(Boolean) : def.capability === 'video' ? video.python : def.id === 'music' ? audio.music?.python : audio[def.id];
+      const engine = def.engine==='llama'?llamaExecutable(this.root):(def.capability||def.id)==='chat' ? platform.ollamaExe : def.capability === 'image' ? Object.values(platform.engines).find(Boolean) : def.capability === 'video' ? video.python : def.id === 'music' ? audio.music?.python : audio[def.id];
       const installed = weights && !!engine && resolve(engine).startsWith(resolve(this.root,'runtime') + sep) && await stat(engine).then(() => true).catch(() => false);
       const supported = (def.capability !== 'video' || videoSupported()) && !(def.audio && process.platform === 'darwin' && process.arch === 'x64');
       return { id: def.id, capability: def.capability || def.id, name: def.name, subtitle: def.subtitle, purpose: def.purpose, description: def.description, bytes: files.reduce((n,f) => n + f.bytes,0), installed, weights, active: installed && this.preferences.active[def.id] !== false, supported, requirement: supported ? null : def.audio ? 'The current audio runtime requires Windows, Linux, or Apple Silicon' : 'NVIDIA CUDA on Windows or Linux required', update: this.checks[def.id]?.state || 'unchecked', checkedAt: this.checks[def.id]?.at, checkError: this.checks[def.id]?.error };
@@ -127,6 +133,7 @@ export class ModelManager extends VideoRuntime {
           await rm(target,{recursive:true,force:true,maxRetries:3});
         } catch(e) { if(e.code !== 'ENOENT') throw e; }
       }
+      if (id === 'orca') await unlink(join(root,'ollama/manifests/registry.ollama.ai/library/wizgard-qwen3.8-orca/latest')).catch(e=>{if(e.code!=='ENOENT')throw e;});
       if (id === 'chat') await unlink(join(root,'ollama/manifests/registry.ollama.ai/library/wizgard-qwen3.8/latest')).catch(e => { if(e.code !== 'ENOENT') throw e; });
       this.preferences.active[id] = false; await this.savePreferences(); await this.refresh(); await this.hooks.changed?.();
       this.job = { ...this.job,status:'complete',percent:100,message:'Model removed. Generated files and shared runtimes were kept.' };

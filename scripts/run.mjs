@@ -27,7 +27,7 @@ try {
   if (previous) throw new Error('A server is already running at ' + url + '. Use its existing Run window, or stop it before starting another copy.');
   await setup(root);
   if (closing) process.exit(0);
-  child = spawn(process.execPath, [join(root, 'server/index.mjs')], { cwd: root, windowsHide: true,
+  child = spawn(process.execPath, ['--dns-result-order=ipv4first', join(root, 'server/index.mjs')], { cwd: root, windowsHide: true,
     env: { ...process.env, WIZGARD_PARENT_PID: String(process.pid) }, stdio: 'inherit' });
   const finished = new Promise((res, rej) => { child.on('error', rej); child.on('exit', code => res(code)); });
   console.log('\nWizgard ' + appInfo.version + ' — An AI Tool developed by Karmikal Apps © 2026\n' + url + '\nKeep this terminal open. Close it or press Ctrl+C to stop the app.\nClosing only the browser tab does not stop the server.\n');

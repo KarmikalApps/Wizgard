@@ -22,4 +22,4 @@ if [ ! -f "$WIZ_NODE" ] || [ ! -f "$WIZ_NODE_DIR/lib/node_modules/npm/bin/npm-cl
 fi
 chmod u+x "$WIZ_NODE"
 cd "$WIZ_ROOT"
-exec "$WIZ_NODE" "$WIZ_ROOT/scripts/run.mjs" "$@"
+exec "$WIZ_NODE" --dns-result-order=ipv4first "$WIZ_ROOT/scripts/run.mjs" "$@"

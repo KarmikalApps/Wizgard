@@ -1,3 +1,4 @@
+import {chatOption} from '../src/chat-options.mjs';
 import { normalizeAudioSettings } from '../src/audio-options.mjs';
 import { imageOptions } from '../src/image-options.mjs';
 import { videoOptions } from '../src/video-options.mjs';
@@ -9,12 +10,13 @@ export function validateRequest(body) {
   if (!['auto', 'chat', 'image', 'video', 'speech', 'music', 'sfx'].includes(body.mode)) fail('Choose an available generation mode.');
   if (body.conversationId && !/^[0-9a-f-]{36}$/.test(body.conversationId)) fail('Invalid conversation ID.');
   const options = normalizeAudioSettings(body.settings || {});
+  const chatId=options.chatModel??'qwen';try{chatOption(chatId);}catch{fail('Choose an available chat model.');}
   const imageId = options.imageModel ?? 'qwen';
-  if (!Object.hasOwn(imageOptions,imageId)) fail('Choose Qwen Image 2.1 or FLUX.2-dev for image generation.');
+  if (!Object.hasOwn(imageOptions,imageId)) fail('Choose an available image model.');
   const videoId = options.videoModel ?? 'ltx25';
-  if (!Object.hasOwn(videoOptions, videoId)) fail('Choose LTX-2.5 or Sulphur 2 for video generation.');
+  if (!Object.hasOwn(videoOptions, videoId)) fail('Choose an available video model.');
   const video = videoOptions[videoId];
-  const settings = { imageModel:imageId, imageGuidance:options.imageGuidance??4, musicLyrics: options.musicLyrics ?? '', voice: options.voice ?? 'Ryan', language: options.language ?? 'Auto', voiceStyle: options.voiceStyle ?? '', musicSeconds: options.musicSeconds ?? 120, sfxSeconds: options.sfxSeconds ?? 'auto', width: options.width ?? 1024, height: options.height ?? 1024, steps: options.steps ?? imageOptions[imageId].steps, seed: options.seed ?? -1,
+  const settings = { chatModel:chatId, imageModel:imageId, imageGuidance:options.imageGuidance??4, musicLyrics: options.musicLyrics ?? '', voice: options.voice ?? 'Ryan', language: options.language ?? 'Auto', voiceStyle: options.voiceStyle ?? '', musicSeconds: options.musicSeconds ?? 120, sfxSeconds: options.sfxSeconds ?? 'auto', width: options.width ?? 1024, height: options.height ?? 1024, steps: options.steps ?? imageOptions[imageId].steps, seed: options.seed ?? -1,
     videoWidth: options.videoWidth ?? 512, videoHeight: options.videoHeight ?? 320, videoSeconds: options.videoSeconds ?? 2, videoModel:videoId, videoFps:options.videoFps ?? video.fps, videoAudio:options.videoAudio === true, web: options.web === true,
     backend: options.backend ?? 'auto', thinking: options.thinking === true };
   if (!Number.isFinite(settings.imageGuidance) || settings.imageGuidance < 1 || settings.imageGuidance > 10) fail('Image guidance must be between 1 and 10.');

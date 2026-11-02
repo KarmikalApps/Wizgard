@@ -19,7 +19,7 @@ test('video bounds follow the selected model, including Auto requests', () => {
   assert.throws(()=>settings({videoModel:'sulphur',videoWidth:1920,videoHeight:1080}),/resolution/);
   assert.throws(()=>settings({videoModel:'sulphur',videoFps:50}),/frame rate/);
   assert.throws(()=>settings({videoModel:'sulphur',videoSeconds:20}),/duration/);
-  for(const id of ['removed-model','__proto__','toString']) { assert.throws(()=>settings({videoModel:id}),/Choose LTX/);assert.throws(()=>videoModel(id),/Choose LTX/); }
+  for(const id of ['removed-model','__proto__','toString']) { assert.throws(()=>settings({videoModel:id}),/Choose an available video model/);assert.throws(()=>videoModel(id),/Choose an available video model/); }
   for(const fps of [24,25,48,50])assert.equal((videoFrames(2,fps)-1)%8,0);
 });
 test('switching models restores separate profiles and migrates removed selections', () => {
@@ -64,13 +64,13 @@ test('video installations are independent and uninstalling one preserves the oth
       for(const m of models)await writeFile(join(root,m.path),'x');
       await writeFile(join(root,config.catalog.stateFile),JSON.stringify({models}));await writeFile(join(root,config.catalog.catalogFile),JSON.stringify(models));
     }
-    const runtime=new VideoRuntime(root);assert.deepEqual((await runtime.choices()).map(m=>m.available),[true,true]);
-    const manager=new ModelManager(root);await writeFile(join(root,'flux2-model-manifest.json'),'[]');await manager.init();assert.deepEqual(manager.snapshot().active,['video']);
+    const runtime=new VideoRuntime(root);assert.deepEqual((await runtime.choices()).map(m=>m.available),[true,true,true]);
+    const manager=new ModelManager(root);await writeFile(join(root,'flux2-model-manifest.json'),'[]');if(!await readFile(join(root,'optional-model-manifest.json')).catch(()=>null))await writeFile(join(root,'optional-model-manifest.json'),'[]');await manager.init();assert.deepEqual(manager.snapshot().active,['video']);
     await manager.uninstall('video','UNINSTALL_video');
-    assert.equal(manager.has('video'),true);assert.deepEqual((await runtime.choices()).map(m=>m.available),[false,true]);
+    assert.equal(manager.has('video'),true);assert.deepEqual((await runtime.choices()).map(m=>m.available),[true,false,true]);
     assert.equal(await readFile(join(root,'models/video/sulphur-0'),'utf8'),'x');
     await assert.rejects(stat(join(root,'models/video/ltx25-0')),{code:'ENOENT'});
-    await manager.setActive('sulphur',false);assert.equal(manager.has('video'),false);
+    await manager.setActive('sulphur',false);assert.equal(manager.has('video'),true);await manager.setActive('ltxuc',false);assert.equal(manager.has('video'),false);
   } finally {await rm(root,{recursive:true,force:true});}
 });
 test('Hugging Face credentials are sent only to its HTTPS origin', async()=>{

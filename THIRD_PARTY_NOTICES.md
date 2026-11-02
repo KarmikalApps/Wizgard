@@ -57,3 +57,15 @@ Audio sources and immutable revisions are recorded in `audio-model-manifest.json
 - [Mistral Small 3.2 24B](https://huggingface.co/mistralai/Mistral-Small-3.2-24B-Instruct-2506), [Unsloth GGUF](https://huggingface.co/unsloth/Mistral-Small-3.2-24B-Instruct-2506-GGUF): Apache 2.0 text encoder.
 
 The FLUX model license requires filtering measures or review of outputs before distribution/display/transmission, and applicable AI-generated-content disclosure. This local integration uses manual output review: review generated files before sharing. Model use and generated outputs have distinct license conditions. The application license does not grant commercial model rights. Sources and pinned checksums are recorded in `flux2-model-manifest.json`.
+
+## Optional models added in v1.400a
+
+| Component | License / source |
+| --- | --- |
+| Qwen3.8 OrcaRouter GGUF and projector | [Apache 2.0, publisher declared](https://huggingface.co/chimingw/Qwen3.8-27B-Uncensored-OrcaRouter-GGUF) |
+| DeepSeek V4.1 Flash GSQ-RCO uncensored GGUF | [MIT, publisher declared](https://huggingface.co/Abiray/DeepSeek-V4.1-Flash-1017-Uncensored-GSQ-RCO-IQ2_XXS-GGUF); retain upstream and modification notices. |
+| Z-Image Turbo GGUF, Heretic Qwen3 encoder and VAE | [Z-Image quantizer](https://huggingface.co/leejet/Z-Image-Turbo-GGUF) and [encoder publisher](https://huggingface.co/LuffyTheFox/Qwen3-Uncensored-TextEncoders-Klein-Z-Image-Anima-GGUF) declare Apache 2.0; consult [companion package](https://huggingface.co/Comfy-Org/z_image_turbo) and upstream component terms. |
+| LTX-2.5 Uncensored Turbo v1.1 | [Community repository](https://huggingface.co/ChrisColeTech/LTX-2.5-uncensored-v1.1-FP8) lists its license as **unknown**. LTX community and Gemma terms remain relevant; additional merged adapter permissions must be checked with the publisher. No blanket commercial or redistribution permission is asserted. |
+| llama.cpp | [MIT and bundled notices](https://github.com/ggml-org/llama.cpp/blob/b12017/LICENSE) |
+
+Weights are not bundled. `optional-model-manifest.json` pins source revisions and checksums; `llama-runtime-manifest.json` pins runtime archives. “Uncensored” describes publisher claims, not an exemption from licenses or a guarantee of behavior. The community LTX derivative is experimental and its additional license permissions are unresolved. Review current upstream and derivative terms before use or redistribution.

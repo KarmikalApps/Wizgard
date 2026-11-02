@@ -28,7 +28,7 @@ export class VideoRuntime {
       if (!['win32', 'linux'].includes(process.platform)) return { available: false, message: 'This video preview requires NVIDIA CUDA on Windows or Linux.' };
       const ready = JSON.parse(await readFile(join(this.root, 'runtime/video-' + process.platform + '-' + process.arch, 'ready.json'), 'utf8'));
       await stat(ready.python);
-      const models = await installedModels(this.root, modelInfo.catalog);
+      const models = (await installedModels(this.root, modelInfo.catalog)).filter(m=>modelInfo.ids.includes(m.id));
       if (models.length !== modelInfo.ids.length || !modelInfo.ids.every(id => models.some(m => m.id === id))) throw new Error('Incomplete video model set.');
       for (const model of models) if ((await stat(join(this.root, model.path))).size !== model.bytes) throw new Error('Missing video weights.');
       return { available: true, phase: this.phase, model: modelInfo.name, ready, models };
@@ -53,7 +53,7 @@ export class VideoRuntime {
   }
   async generate(prompt, settings, signal, emit, sourcePaths = []) {
     const modelId = settings.videoModel || 'ltx25', modelInfo = videoModel(modelId);
-    const isLtx = modelId === 'ltx25', audio = modelInfo.audio && settings.videoAudio === true;
+    const isLtx = ['ltx25','ltxuc'].includes(modelId), audio = modelInfo.audio && settings.videoAudio === true;
     if (sourcePaths.length > modelInfo.maxImages) throw new Error(modelInfo.name + ' supports up to ' + modelInfo.maxImages + ' image attachment(s) per clip.');
     const status = await this.status(modelId);
     if (!status.available) throw new Error(status.message);
@@ -92,7 +92,7 @@ export class VideoRuntime {
       const names = Object.fromEntries(status.models.map(m => [m.id, relative(join(this.root, 'models/video', m.category), join(this.root, m.path))]));
       const variant = sourcePaths.length ? 'i2v' : 't2v';
       const common = { prompt, seed, width, height, frames, fps, audio, sourceImages: copiedInputs.map(p => basename(p)), outputId: id };
-      const graph = isLtx ? buildLtx25Workflow({ ...common, transformer:names['ltx-transformer'], encoder:names['ltx-encoder'], vae:names['ltx-vae'], audioVae:names['ltx-audio-vae'], upscaler:names['ltx-upscaler'] }) : buildSulphurWorkflow({ ...common, checkpoint: names.video, lora: names['video-lora'], encoder: names['video-encoder'] });
+      const graph = isLtx ? buildLtx25Workflow({ ...common, transformer:names[modelInfo.ids[0]], encoder:names[modelInfo.ids[1]], vae:names[modelInfo.ids[2]], audioVae:names[modelInfo.ids[3]], upscaler:names[modelInfo.ids[4]] }) : buildSulphurWorkflow({ ...common, checkpoint: names.video, lora: names['video-lora'], encoder: names['video-encoder'] });
       socket = new WebSocket('ws://127.0.0.1:8189/ws?clientId=' + client);
       socket.addEventListener('error', () => {});
       let jobId;

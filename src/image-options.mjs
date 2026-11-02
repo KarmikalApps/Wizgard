@@ -1,4 +1,5 @@
 export const imageOptions = {
+  zimage:{name:'Z-Image Turbo · Heretic encoder',managerId:'zimage',steps:9,maxImages:0,description:'Fast text-to-image generation with a publisher-described uncensored Qwen3 encoder. This integration does not accept image references.'},
   qwen: { name:'Qwen Image 2.1', managerId:'image', steps:25, maxImages:10,
     description:'Create images and transform up to 10 ordered visual references.' },
   flux2: { name:'FLUX.2-dev', managerId:'flux2', steps:28, maxImages:10,

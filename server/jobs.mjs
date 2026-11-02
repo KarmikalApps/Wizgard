@@ -16,7 +16,7 @@ export class JobQueue {
     const saved=structuredClone(data);job.events.push({event,data:saved});for(const listener of job.listeners)listener(event,saved);
   }
   pending(){return [...this.jobs.values()].filter(j=>!j.executing&&['queued','paused'].includes(j.state)).sort((a,b)=>a.order-b.order);}
-  timingKey(job){const mode=job.route||job.input.mode,s=job.input.settings||{};return JSON.stringify([mode,mode==='image'?[s.imageModel,s.width,s.height,s.steps,s.backend]:mode==='video'?[s.videoModel,s.videoWidth,s.videoHeight,s.videoSeconds,s.videoFps,s.videoAudio]:mode==='music'?[s.musicSeconds]:mode==='sfx'?[s.sfxSeconds]:mode==='speech'?[Math.ceil((job.input.prompt?.length||0)/200)]:[!!s.thinking]]);}
+  timingKey(job){const mode=job.route||job.input.mode,s=job.input.settings||{};return JSON.stringify([mode,mode==='image'?[s.imageModel,s.width,s.height,s.steps,s.backend]:mode==='video'?[s.videoModel,s.videoWidth,s.videoHeight,s.videoSeconds,s.videoFps,s.videoAudio]:mode==='music'?[s.musicSeconds]:mode==='sfx'?[s.sfxSeconds]:mode==='speech'?[Math.ceil((job.input.prompt?.length||0)/200)]:[s.chatModel||'qwen',!!s.thinking]]);}
   activeSeconds(job,now=Date.now()){return (job.activeMillis+(job.activeSince==null?0:now-job.activeSince))/1000;}
   account(job){if(job.activeSince!=null){job.activeMillis+=Date.now()-job.activeSince;job.activeSince=null;}}
   estimate(job){const samples=this.timings[this.timingKey(job)];return Array.isArray(samples)&&samples.length?samples.reduce((a,b)=>a+b,0)/samples.length:null;}

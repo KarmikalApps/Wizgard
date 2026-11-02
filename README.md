@@ -6,7 +6,7 @@
 
 An AI Tool developed by **Karmikal Apps** © 2026
 
-**v1.302a**
+**v1.400a**
 
 See the [changelog](CHANGELOG.md) for what is new.
 
@@ -16,9 +16,9 @@ Wizgard is a React and Node.js application that brings six local AI capabilities
 
 | Capability | Model | Example prompt |
 | --- | --- | --- |
-| Chat and analysis | Qwen3.8 27B, HauhauCS | “Explain this PDF and answer my questions.” |
-| Images | Qwen Image 2.1, 0xSojalSec, or FLUX.2-dev | “Create an image of a mountain cabin at sunrise.” |
-| Video | LTX-2.5 or Sulphur 2 | “Create a video of a paper boat floating on a pond.” |
+| Chat and analysis | Qwen3.8 HauhauCS, Qwen3.8 OrcaRouter, or DeepSeek V4.1 Flash | “Explain this PDF and answer my questions.” |
+| Images | Qwen Image 2.1, FLUX.2-dev, or Z-Image Turbo with Heretic encoder | “Create an image of a mountain cabin at sunrise.” |
+| Video | LTX-2.5, Sulphur 2, or LTX-2.5 Uncensored Turbo | “Create a video of a paper boat floating on a pond.” |
 | Speech | Qwen3-TTS 1.7B CustomVoice | “Say ‘Welcome to Wizgard’ in a warm voice.” |
 | Music | ACE-Step 1.5 Turbo | “Create 30 seconds of peaceful piano music, no vocals.” |
 | Sound effects | MOSS SoundEffect v2 | “Generate 10 seconds of rain on a window.” |
@@ -31,7 +31,7 @@ Wizgard is a React and Node.js application that brings six local AI capabilities
 - Choose where new media is saved. Download a copy or reveal the saved original in its folder.
 - Use **Clear Workspace** to remove chats, attachments and generated media after confirmation. Models and settings are preserved.
 
-Chat runs through a private Ollama instance. Images use `stable-diffusion.cpp`; video and music use isolated ComfyUI processes. Speech and sound effects have separate Python environments. Generators take turns using GPU memory and exit after each job. No hosted inference subscription or API key is needed. The optional FastMTP sidecar is not enabled.
+Qwen chat models run through a private Ollama instance. Optional DeepSeek uses a separate private llama.cpp server. Images use `stable-diffusion.cpp`; video and music use isolated ComfyUI processes. Speech and sound effects have separate Python environments. Generators take turns using GPU memory and exit after each job. No hosted inference subscription or API key is needed. The optional FastMTP sidecar is not enabled.
 
 ## Install and run
 
@@ -81,9 +81,30 @@ Speech offers nine preset voices and ten languages: English, Chinese, Japanese, 
 
 **Keep the Run window open. Closing it or pressing Ctrl+C stops Wizgard and its owned engines.** Closing only the browser tab leaves the app running. On Windows, answer **Y** if asked to terminate the batch job. Settings also includes **Shut down local runtimes**. `Stop-Wizgard.cmd` is an optional fallback.
 
+### Optional models and chat settings
+
+The original defaults and setup selection are unchanged. The following additional models are **optional**, available in setup and **Manage Models**. Installing an option does not replace the original model. Choose an installed, active model under **Settings → Chat generation**, **Image generation**, or **Video generation**. The selected chat model also handles Auto routing, document interpretation and web research.
+
+| Additional option | Approximate weights | Integration notes |
+| --- | --- | --- |
+| Qwen3.8 OrcaRouter 27B (Uncensored) | 17.7 GB | Q4_K_M plus vision projector; private Ollama. Similar memory class to the default chat model. |
+| DeepSeek V4.1 Flash 1017 (Uncensored) | 250.2 GB | Community GSQ-RCO IQ2_XXS build, six colocated shards plus vision projector; separate llama.cpp b12017 runtime. |
+| Z-Image Turbo · Heretic encoder | 11.2 GB | Q8 transformer and publisher-described uncensored Qwen3 encoder; text-to-image only, nine steps by default. |
+| LTX-2.5 Uncensored Turbo v1.1 | 37.5 GB | Experimental community FP8 model and encoder; uses the LTX two-stage workflow and the same configurable output sizes, frame rates, duration and sound options. |
+
+Sizes exclude engines, download archives and working memory. DeepSeek needs a fast SSD, at least **270 GB free for its initial weights and headroom**, and substantially more capacity for updates that retain old weights. For fully resident use, plan for **at least 256 GB combined usable RAM/VRAM plus operating-system and context headroom; 384 GB or more RAM is a more practical target**. These are capacity estimates, not measured performance guarantees. Memory mapping can run with less resident memory but may page heavily and become extremely slow. The app does not install a specialized disk-offload runtime. DeepSeek is used inside Wizgard through llama.cpp, not through the Ollama client. Windows/Linux NVIDIA builds use CUDA when available; CPU and macOS builds are also provided. Platform/driver compatibility still applies.
+
+The new optional integrations have automated configuration and protocol coverage. Full generation with their downloaded weights has not been validated for this release. Treat them as experimental options for local testing. Existing installed models remain available. No additional speech, music or sound-effects model has been labeled uncensored without a verified publisher claim; the existing audio options are retained.
+
+### Automatic answer completion
+
+All chat options use unlimited engine output rather than a fixed 4,096-token response cap. Wizgard continues responses that hit a length boundary, requests a final answer after reasoning-only output, and checks for explicit missing parts after a normal completion. Continuations append to the same response and show their status. Original prompts and recent response context are retained within the model context window.
+
+This may use more time and tokens. It cannot guarantee correctness or unlimited context, and detects repeated output or lack of progress instead of looping indefinitely. Engine errors preserve the partial answer. **Stop still cancels immediately; Pause/Resume keeps its existing behavior.** Media generators retain their model-specific duration, dimensions and inference-step limits; token continuation applies to chat, not to extending generated clips or audio beyond supported limits.
+
 ### Image settings
 
-Choose **Qwen Image 2.1** or **FLUX.2-dev** in **Settings → Image generation**. Both appear during setup and can be installed, updated, activated and uninstalled independently. Auto image requests use the selected image model. Size and steps are remembered separately; FLUX also exposes guidance (default 4) and starts at 28 steps. Both accept up to 10 image references in this integration.
+Choose **Qwen Image 2.1**, **FLUX.2-dev**, or **Z-Image Turbo · Heretic encoder** in **Settings → Image generation**. All appear during setup and can be installed, updated, activated and uninstalled independently. Auto image requests use the selected image model. Size and steps are remembered separately; FLUX also exposes guidance (default 4) and starts at 28 steps. Qwen Image and FLUX accept up to 10 image references; Z-Image supports text-to-image only and rejects reference attachments.
 
 FLUX.2-dev uses a city96 Q4_K_S transformer, an Unsloth Mistral Small 3.2 24B Q4_K_M text encoder and Black Forest Labs' VAE, all running locally through stable-diffusion.cpp. The package is approximately **34 GB**. Plan for **64 GB RAM and 24–32 GB VRAM**, or a machine with sufficient unified memory; CPU offloading is slower. Start at 512 × 512 before trying larger outputs. These are estimates, not guarantees.
 
@@ -93,7 +114,7 @@ The official FLUX VAE requires repository access. Use your existing Hugging Face
 
 Open another conversation while a response is being generated. Each conversation keeps its own progress, response and Pause/Resume/Stop controls. Responses continue when switching conversations or closing the browser tab; reopening the app reconnects to unfinished jobs. A sidebar indicator identifies running, queued and paused conversations. Scrolling up preserves your reading position while a response streams; **Jump to latest** resumes following new text. Scroll positions are remembered while switching conversations in the current tab.
 
-Multiple conversations can have pending work at once. The bundled Ollama runtime currently processes this Qwen model architecture **one response at a time**, so chat requests wait in a visible queue. Media generation waits for exclusive engine access so different large models do not compete for memory. Auto requests first use the chat engine to select a capability, then wait for exclusive access when needed. More work can be submitted while other jobs run; the interface explains that processing may be slower. At most 20 unfinished jobs can be queued, with one unfinished response per conversation.
+Multiple conversations can have pending work at once. Chat engines process **one response at a time**, so chat requests wait in a visible queue. Media generation waits for exclusive engine access so different large models do not compete for memory. Auto requests first use the chat engine to select a capability, then wait for exclusive access when needed. More work can be submitted while other jobs run; the interface explains that processing may be slower. At most 20 unfinished jobs can be queued, with one unfinished response per conversation.
 
 **Pause freezes the owned native engine in memory. Resume continues that same generation; it does not restart it.** Allocated memory remains in use. A chat-engine pause also blocks queued work until Resume or Stop. Queued requests can be paused before they begin. A GPU operation already submitted may finish before the engine becomes idle. Stop ends the selected job; stopping while the engine is paused first resumes it so cancellation can complete. Closing Wizgard itself ends running and paused jobs; pause state is not a checkpoint that survives an app restart.
 
@@ -123,11 +144,13 @@ Setup, Manage Models and Settings show **(Uncensored)** only for variants descri
 - [Qwen Image 2.1, 0xSojalSec](https://huggingface.co/0xSojalSec/Qwen-Image-2.1-Uncensored-GGUF): the publisher describes local generation without a pipeline safety checker; these are quantized original weights.
 - [Sulphur 2](https://huggingface.co/SulphurAI/Sulphur-2-base): a publisher-described uncensored video model.
 
+OrcaRouter and DeepSeek use the same publisher-based label. The optional LTX Turbo derivative is publisher-described uncensored; Z-Image is labeled **(Uncensored encoder)** because the claim applies specifically to its modified text encoder.
+
 The label is **not a promise of no limits**. Refusals, capabilities, hardware requirements and license restrictions still vary. LTX-2.5, FLUX.2-dev and the audio models are not labeled uncensored merely because they run locally or have downloadable weights. An absent label means Wizgard has no verified publisher claim for that variant.
 
 ### Video settings
 
-Select **LTX-2.5** or **Sulphur 2** in **Settings → Video generation**. Both can be installed, activated, updated or uninstalled independently in Manage Models. Video mode remains available while either is active.
+Select **LTX-2.5**, **Sulphur 2**, or **LTX-2.5 Uncensored Turbo v1.1** in **Settings → Video generation**. Each can be installed, activated, updated or uninstalled independently in Manage Models. Video mode remains available while any video model is active. The community Turbo option uses the LTX-2.5 column below; its settings are stored independently.
 
 | Setting | LTX-2.5 | Sulphur 2 |
 | --- | --- | --- |
@@ -270,7 +293,7 @@ npm test
 npm run build
 ```
 
-Use the Run launcher for normal operation. Running `npm start` directly assumes app dependencies and the interface build are already present; model checks still run in the server. Model sources are in `model-manifest.json`, `flux2-model-manifest.json`, `video-model-manifest.json`, `sulphur-model-manifest.json`, and `audio-model-manifest.json`. Core, video and audio runtimes have separate manifests. Model integration tests require downloaded weights; `npm test` runs the small regression suite without them.
+Use the Run launcher for normal operation. Running `npm start` directly assumes app dependencies and the interface build are already present; model checks still run in the server. Model sources are in `model-manifest.json`, `flux2-model-manifest.json`, `video-model-manifest.json`, `sulphur-model-manifest.json`, `audio-model-manifest.json`, and `optional-model-manifest.json`. Core, video, audio and llama.cpp runtimes have separate manifests. Model integration tests require downloaded weights; `npm test` runs the small regression suite without them.
 
 ## Copyright and model licenses
 
@@ -291,6 +314,12 @@ Wizgard is an independent tool that uses third-party models. Karmikal Apps does 
 | Qwen3-TTS 1.7B CustomVoice | [Apache 2.0](licenses/Qwen3-TTS-LICENSE.txt) |
 | ACE-Step 1.5 Turbo, packaged by Comfy-Org | [MIT](licenses/ACE-Step-1.5-LICENSE.txt) |
 | MOSS SoundEffect v2 | [Apache 2.0](licenses/MOSS-TTS-LICENSE.txt) |
+| Qwen3.8 OrcaRouter GGUF and projector | [Apache 2.0, publisher declared](https://huggingface.co/chimingw/Qwen3.8-27B-Uncensored-OrcaRouter-GGUF) |
+| DeepSeek V4.1 Flash GSQ-RCO uncensored GGUF | [MIT, publisher declared](https://huggingface.co/Abiray/DeepSeek-V4.1-Flash-1017-Uncensored-GSQ-RCO-IQ2_XXS-GGUF); retain upstream and modification notices. |
+| Z-Image Turbo GGUF, Heretic Qwen3 encoder and VAE | [Z-Image quantizer](https://huggingface.co/leejet/Z-Image-Turbo-GGUF) and [encoder publisher](https://huggingface.co/LuffyTheFox/Qwen3-Uncensored-TextEncoders-Klein-Z-Image-Anima-GGUF) declare Apache 2.0; consult [companion package](https://huggingface.co/Comfy-Org/z_image_turbo) and upstream component terms. |
+| LTX-2.5 Uncensored Turbo v1.1 | [Community repository](https://huggingface.co/ChrisColeTech/LTX-2.5-uncensored-v1.1-FP8) lists its license as **unknown**. LTX community and Gemma terms remain relevant; additional merged adapter permissions must be checked with the publisher. No blanket commercial or redistribution permission is asserted. |
+| llama.cpp | [MIT and bundled notices](https://github.com/ggml-org/llama.cpp/blob/b12017/LICENSE) |
+
 
 **Qwen Image 2.1 is restricted to non-commercial research or evaluation; commercial use requires a separate license from its licensor.** An MIT-licensed interface does not remove model restrictions. Wizgard downloads weights locally and does not include them in its source package.
 

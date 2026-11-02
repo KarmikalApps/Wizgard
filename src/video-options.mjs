@@ -17,6 +17,7 @@ export const videoOptions = {
     durations:[2,4,6,8], sizes:previewSizes,
     description:'Generate short clips with optional sound. Use text alone, one opening image, or up to 10 image guides.' },
 };
+videoOptions.ltxuc={...videoOptions.ltx25,name:'LTX-2.5 Uncensored Turbo v1.1',managerId:'ltxuc',description:'Optional community LTX-2.5 fine-tune with an uncensored encoder. Publisher license metadata is unknown; review all upstream and adapter terms before use or redistribution.'};
 export function videoFrames(seconds, fps) { return Math.ceil(seconds * fps / 8) * 8 + 1; }
 export function normalizeVideoSettings(settings, modelId = settings.videoModel) {
   const id = Object.hasOwn(videoOptions, modelId) ? modelId : 'ltx25', model = videoOptions[id];

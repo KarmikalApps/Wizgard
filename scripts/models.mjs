@@ -1,12 +1,13 @@
 import { readFile, writeFile, mkdir, rename, stat, statfs } from 'node:fs/promises';
 import { join, resolve, sep } from 'node:path';
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { download, hashFile } from './download.mjs';
 
 const digestPattern = /^[0-9a-f]{64}$/;
 export function modelPath(model, sha256) {
   if (!digestPattern.test(sha256)) throw new Error('Invalid model checksum.');
-  if (['chat', 'chat-projector'].includes(model.id)) return 'models/ollama/blobs/sha256-' + sha256;
+  if (['chat', 'chat-projector','orca-chat','orca-projector'].includes(model.id)) return 'models/ollama/blobs/sha256-' + sha256;
+  if(model.family==='zimage')return 'models/image/zimage/'+sha256+'/'+model.filename.split('/').at(-1);
   if (model.family === 'flux2') return 'models/image/flux2/' + sha256 + '/' + model.filename.split('/').at(-1);
   if (model.kind === 'video') return 'models/video/' + model.category + '/' + sha256 + '/' + model.filename.split('/').at(-1);
   return 'models/image/' + sha256 + '/' + model.filename.split('/').at(-1);
@@ -55,6 +56,8 @@ export async function updateModels(root, { fetchImpl = fetch, downloadImpl = dow
     const baseline = catalog.find(item => item.id === latest.id && item.sha256 === latest.sha256);
     return { ...latest, path: known?.path || baseline?.path || modelPath(latest, latest.sha256), checked, receipt: known?.receipt };
   });
+  const shards=chosen.filter(m=>m.family==='deepseek41');
+  if(shards.length){const same=shards.every(m=>previous.some(p=>p.id===m.id&&p.sha256===m.sha256));if(!same){const revision=createHash('sha256').update(shards.map(m=>m.sha256).join('')).digest('hex').slice(0,24);for(const m of shards)m.path='models/chat/deepseek41/'+revision+'/'+m.localFilename;}}
   let missing = 0;
   for (const model of chosen) {
     const file = safePath(root, model.path);

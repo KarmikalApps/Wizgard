@@ -9,7 +9,7 @@ if not exist "%~dp0runtime\node\node_modules\npm\bin\npm-cli.js" (
   powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\bootstrap-win.ps1"
   if errorlevel 1 goto failed
 )
-"%~dp0runtime\node\node.exe" "%~dp0scripts\run.mjs"
+"%~dp0runtime\node\node.exe" --dns-result-order=ipv4first "%~dp0scripts\run.mjs"
 if errorlevel 1 goto failed
 exit /b 0
 :failed

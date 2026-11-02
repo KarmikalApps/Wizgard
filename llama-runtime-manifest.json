@@ -1,0 +1,101 @@
+[
+  {
+    "key": "win32-x64-llama-b12017-bin-win-cpu-x64.zip",
+    "platform": "win32-x64",
+    "backend": "cpu",
+    "url": "https://github.com/ggml-org/llama.cpp/releases/download/b12017/llama-b12017-bin-win-cpu-x64.zip",
+    "bytes": 24574610,
+    "sha256": "e89d351a603e91a9e3e944c4c4c4ccf5b4af6acbd44c5434b61bacfa3999b1f6",
+    "archive": "runtime/archives/llama-b12017-bin-win-cpu-x64.zip",
+    "destination": "runtime/llama-win32-x64/cpu",
+    "strip": 0
+  },
+  {
+    "key": "win32-x64-llama-b12017-bin-win-cuda-12.4-x64.zip",
+    "platform": "win32-x64",
+    "backend": "cuda",
+    "url": "https://github.com/ggml-org/llama.cpp/releases/download/b12017/llama-b12017-bin-win-cuda-12.4-x64.zip",
+    "bytes": 279943357,
+    "sha256": "294eb8f846bdcd21a7b59b8483fac56fc44f14f7d7580107022a911ee76fab48",
+    "archive": "runtime/archives/llama-b12017-bin-win-cuda-12.4-x64.zip",
+    "destination": "runtime/llama-win32-x64/cuda",
+    "strip": 0
+  },
+  {
+    "key": "win32-x64-cudart-llama-bin-win-cuda-12.4-x64.zip",
+    "platform": "win32-x64",
+    "backend": "cuda",
+    "url": "https://github.com/ggml-org/llama.cpp/releases/download/b12017/cudart-llama-bin-win-cuda-12.4-x64.zip",
+    "bytes": 391443627,
+    "sha256": "8c79a9b226de4b3cacfd1f83d24f962d0773be79f1e7b75c6af4ded7e32ae1d6",
+    "archive": "runtime/archives/cudart-llama-bin-win-cuda-12.4-x64.zip",
+    "destination": "runtime/llama-win32-x64/cuda",
+    "strip": 0
+  },
+  {
+    "key": "linux-x64-llama-b12017-bin-ubuntu-x64.tar.gz",
+    "platform": "linux-x64",
+    "backend": "cpu",
+    "url": "https://github.com/ggml-org/llama.cpp/releases/download/b12017/llama-b12017-bin-ubuntu-x64.tar.gz",
+    "bytes": 22880375,
+    "sha256": "16fe348b1bc2e943bc4c220938ce46af789e88291138bca5bd68c0cc017769a5",
+    "archive": "runtime/archives/llama-b12017-bin-ubuntu-x64.tar.gz",
+    "destination": "runtime/llama-linux-x64/cpu",
+    "strip": 0
+  },
+  {
+    "key": "linux-x64-llama-b12017-bin-ubuntu-cuda-12.8-x64.tar.gz",
+    "platform": "linux-x64",
+    "backend": "cuda",
+    "url": "https://github.com/ggml-org/llama.cpp/releases/download/b12017/llama-b12017-bin-ubuntu-cuda-12.8-x64.tar.gz",
+    "bytes": 182779856,
+    "sha256": "642fcc4d8682de2aa3790f9294a6236a2792e5701c27a3129d36c78c30219299",
+    "archive": "runtime/archives/llama-b12017-bin-ubuntu-cuda-12.8-x64.tar.gz",
+    "destination": "runtime/llama-linux-x64/cuda",
+    "strip": 0
+  },
+  {
+    "key": "linux-x64-cudart-llama-b12017-bin-ubuntu-cuda-12.8-x64.tar.gz",
+    "platform": "linux-x64",
+    "backend": "cuda",
+    "url": "https://github.com/ggml-org/llama.cpp/releases/download/b12017/cudart-llama-b12017-bin-ubuntu-cuda-12.8-x64.tar.gz",
+    "bytes": 594372371,
+    "sha256": "1fd1ce40b8992758f5819f3f0dfa6d970208a3c43c2c521e30b26daf5060fa53",
+    "archive": "runtime/archives/cudart-llama-b12017-bin-ubuntu-cuda-12.8-x64.tar.gz",
+    "destination": "runtime/llama-linux-x64/cuda",
+    "strip": 0
+  },
+  {
+    "key": "linux-arm64-llama-b12017-bin-ubuntu-arm64.tar.gz",
+    "platform": "linux-arm64",
+    "backend": "cpu",
+    "url": "https://github.com/ggml-org/llama.cpp/releases/download/b12017/llama-b12017-bin-ubuntu-arm64.tar.gz",
+    "bytes": 18571024,
+    "sha256": "676e8f99db67fbecd7854b948ed50d0bf5d7db463613fc8fcd8f4491a7709bec",
+    "archive": "runtime/archives/llama-b12017-bin-ubuntu-arm64.tar.gz",
+    "destination": "runtime/llama-linux-arm64/cpu",
+    "strip": 0
+  },
+  {
+    "key": "darwin-arm64-llama-b12017-bin-macos-arm64.tar.gz",
+    "platform": "darwin-arm64",
+    "backend": "cpu",
+    "url": "https://github.com/ggml-org/llama.cpp/releases/download/b12017/llama-b12017-bin-macos-arm64.tar.gz",
+    "bytes": 16508951,
+    "sha256": "4cfa51501cc3c602b404f43682e713405b4b946847876c5081d0a3f93ff26914",
+    "archive": "runtime/archives/llama-b12017-bin-macos-arm64.tar.gz",
+    "destination": "runtime/llama-darwin-arm64/cpu",
+    "strip": 0
+  },
+  {
+    "key": "darwin-x64-llama-b12017-bin-macos-x64.tar.gz",
+    "platform": "darwin-x64",
+    "backend": "cpu",
+    "url": "https://github.com/ggml-org/llama.cpp/releases/download/b12017/llama-b12017-bin-macos-x64.tar.gz",
+    "bytes": 12248734,
+    "sha256": "f51371545526a8655f30bdf2e2f157d00d7ed9bddf1939106b09ac76148e59e5",
+    "archive": "runtime/archives/llama-b12017-bin-macos-x64.tar.gz",
+    "destination": "runtime/llama-darwin-x64/cpu",
+    "strip": 0
+  }
+]
